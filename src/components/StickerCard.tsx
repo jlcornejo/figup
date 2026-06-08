@@ -22,30 +22,26 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
   const duplicate = quantity > 1;
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didLongPress = useRef(false);
-  const [wikiThumb, setWikiThumb] = useState<string | null>(null);
+  const [showActions, setShowActions] = useState(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
-  // Fetch Wikipedia thumbnail for owned players without a captured photo
+  // Close actions popup when clicking outside
   useEffect(() => {
-    if (!owned || image || sticker.type !== "player") return;
-    if (sticker.name.length < 4) return;
-
-    const name = sticker.name.replace(/ /g, "_");
-    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`)
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        if (data?.thumbnail?.source) {
-          setWikiThumb(data.thumbnail.source);
-        } else {
-          // Try with "(footballer)" suffix
-          return fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name + "_(footballer)")}`)
-            .then((r) => r.ok ? r.json() : null)
-            .then((d) => { if (d?.thumbnail?.source) setWikiThumb(d.thumbnail.source); });
-        }
-      })
-      .catch(() => {});
-  }, [owned, image, sticker.name, sticker.type]);
-
-  const displayImage = image || wikiThumb;
+    if (!showActions) return;
+    const handleOutside = (e: PointerEvent) => {
+      if (actionsRef.current && !actionsRef.current.contains(e.target as Node)) {
+        setShowActions(false);
+      }
+    };
+    // Small delay to avoid the same tap closing it immediately
+    const timer = setTimeout(() => {
+      document.addEventListener("pointerdown", handleOutside);
+    }, 50);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("pointerdown", handleOutside);
+    };
+  }, [showActions]);
 
   const startPress = useCallback(() => {
     didLongPress.current = false;
@@ -67,8 +63,14 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
       didLongPress.current = false;
       return;
     }
-    onAdd();
-  }, [onAdd]);
+    if (owned) {
+      // On owned stickers, show actions popup (mobile-friendly)
+      setShowActions(true);
+    } else {
+      // On empty stickers, add directly
+      onAdd();
+    }
+  }, [onAdd, owned]);
 
   return (
     <div className="sticker-card relative select-none group">
@@ -83,23 +85,25 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
               : "bg-white border-sticker-green/60 shadow-lg shadow-green-400/15"
             : "border-dashed border-white/15 hover:border-white/30 bg-white/[0.04] hover:bg-white/[0.08]"
           }
+          ${showActions && owned ? "ring-2 ring-wc-purple/60 scale-105" : ""}
         `}
         onClick={handleClick}
         onContextMenu={(e) => {
           e.preventDefault();
-          onRemove();
+          if (owned) setShowActions(true);
+          else onRemove();
         }}
-        onTouchStart={startPress}
-        onTouchEnd={endPress}
-        onTouchCancel={endPress}
-        onMouseDown={startPress}
-        onMouseUp={endPress}
-        onMouseLeave={endPress}
+        onTouchStart={!owned ? startPress : undefined}
+        onTouchEnd={!owned ? endPress : undefined}
+        onTouchCancel={!owned ? endPress : undefined}
+        onMouseDown={!owned ? startPress : undefined}
+        onMouseUp={!owned ? endPress : undefined}
+        onMouseLeave={!owned ? endPress : undefined}
       >
-        {owned && displayImage ? (
+        {owned && image ? (
           <div className="w-full h-full relative">
             <img
-              src={displayImage}
+              src={image}
               alt={sticker.name}
               className="w-full h-full object-cover"
             />
@@ -142,9 +146,65 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
         )}
       </div>
 
-      {/* Action buttons */}
-      {owned && (
-        <div className="absolute -bottom-1 left-0 right-0 flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Actions popup — shown on tap (mobile) or hover (desktop) */}
+      {showActions && owned && (
+        <div
+          ref={actionsRef}
+          className="absolute z-50 -bottom-2 left-1/2 -translate-x-1/2 translate-y-full
+            flex items-center gap-1 bg-[#1e1b3a] border border-white/15 rounded-xl px-2 py-1.5 shadow-xl shadow-black/40"
+        >
+          {/* Add more */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onAdd(); setShowActions(false); }}
+            className="w-7 h-7 rounded-full bg-wc-green/90 text-white text-xs font-bold flex items-center justify-center active:scale-90 transition-transform"
+            title="Sumar"
+          >
+            +
+          </button>
+          {/* Remove */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove(); setShowActions(false); }}
+            className="w-7 h-7 rounded-full bg-wc-red/90 text-white text-xs font-bold flex items-center justify-center active:scale-90 transition-transform"
+            title="Quitar"
+          >
+            −
+          </button>
+          {/* Info */}
+          {onInfoClick && sticker.type === "player" && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onInfoClick(); setShowActions(false); }}
+              className="w-7 h-7 rounded-full bg-wc-purple/90 text-white text-[10px] flex items-center justify-center active:scale-90 transition-transform"
+              title="Info"
+            >
+              ℹ
+            </button>
+          )}
+          {/* View image */}
+          {image && onImageClick && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onImageClick(); setShowActions(false); }}
+              className="w-7 h-7 rounded-full bg-white/80 text-black text-[10px] flex items-center justify-center active:scale-90 transition-transform"
+              title="Ver"
+            >
+              🔍
+            </button>
+          )}
+          {/* Camera */}
+          {onCameraClick && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onCameraClick(); setShowActions(false); }}
+              className="w-7 h-7 rounded-full bg-wc-teal/90 text-white text-[10px] flex items-center justify-center active:scale-90 transition-transform"
+              title="Foto"
+            >
+              📷
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Desktop hover buttons (hidden on touch devices) */}
+      {owned && !showActions && (
+        <div className="absolute -bottom-1 left-0 right-0 hidden sm:flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
             className="w-5 h-5 rounded-full bg-wc-red/90 text-white text-[10px] font-bold flex items-center justify-center hover:bg-wc-red shadow-sm"
