@@ -84,11 +84,11 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
           <div className="w-full h-full relative">
             <img
               src={image}
-              alt={sticker.code}
+              alt={sticker.name}
               className="w-full h-full object-cover"
             />
             <span className="absolute bottom-0 left-0 right-0 text-[7px] font-bold text-center py-0.5 bg-black/50 text-white">
-              {sticker.code}
+              {sticker.name}
             </span>
           </div>
         ) : owned ? (

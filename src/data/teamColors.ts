@@ -51,4 +51,5 @@ export const teamColors: Record<string, { primary: string; secondary: string; ac
   CRO: { primary: "#C62828", secondary: "#FFFFFF", accent: "#1A237E" },
   GHA: { primary: "#1B5E20", secondary: "#FCD116", accent: "#C62828" },
   PAN: { primary: "#1A3A8A", secondary: "#C62828", accent: "#FFFFFF" },
+  CUW: { primary: "#002B7F", secondary: "#F9E814", accent: "#C8102E" },
 };

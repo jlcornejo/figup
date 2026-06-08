@@ -43,7 +43,14 @@ export function useCollection(userId: string | null) {
     prevUserId.current = userId;
 
     async function load() {
-      if (userId && isSupabaseConfigured && supabase) {
+      // Dev mode or no supabase — use localStorage only
+      if (userId === "dev-local-user" || !isSupabaseConfigured || !supabase) {
+        setCollection(loadFromLocalStorage());
+        setIsLoaded(true);
+        return;
+      }
+
+      if (userId) {
         const { data, error } = await supabase
           .from("collections")
           .select("sticker_code, quantity")
@@ -82,7 +89,7 @@ export function useCollection(userId: string | null) {
     if (!isLoaded) return;
     saveToLocalStorage(collection);
 
-    if (userId && isSupabaseConfigured && supabase) {
+    if (userId && userId !== "dev-local-user" && isSupabaseConfigured && supabase) {
       if (syncTimeout.current) clearTimeout(syncTimeout.current);
       syncTimeout.current = setTimeout(() => {
         syncToSupabase(userId, collection);

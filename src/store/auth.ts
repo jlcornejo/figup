@@ -12,11 +12,25 @@ export interface UserProfile {
 }
 
 export function useAuth() {
+  const skipAuth = process.env.NEXT_PUBLIC_SKIP_AUTH === "true";
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Skip auth — simulate logged-in user for local dev
+    if (skipAuth) {
+      setUser({ id: "dev-local-user" } as User);
+      setProfile({
+        id: "dev-local-user",
+        email: "dev@figup.local",
+        displayName: "Dev User",
+        avatarUrl: null,
+      });
+      setIsLoading(false);
+      return;
+    }
+
     if (!isSupabaseConfigured || !supabase) {
       setIsLoading(false);
       return;

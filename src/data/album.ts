@@ -1,3 +1,5 @@
+import catalogRaw from "./panini-wc-2026-catalog.json";
+
 export interface Sticker {
   code: string;
   name: string;
@@ -18,165 +20,141 @@ export interface SpecialSection {
   stickers: Sticker[];
 }
 
-export type AlbumSection = TeamSection | SpecialSection;
+// Filter out European shiny variants (codes ending in "s") and regional CC codes
+const standardStickers = catalogRaw.stickers.filter(
+  (s) => !s.code.endsWith("s") && !s.code.startsWith("CC-")
+);
 
-function generateTeamStickers(code: string): Sticker[] {
-  return Array.from({ length: 20 }, (_, i) => ({
-    code: `${code}${i + 1}`,
-    name: `${code}${i + 1}`,
-    type: (i === 0 ? "badge" : i === 1 ? "team_photo" : "player") as Sticker["type"],
-  }));
+// Determine sticker type from name/code
+function getStickerType(code: string, name: string): Sticker["type"] {
+  if (code.startsWith("FWC")) return "foil";
+  if (code === "00") return "special";
+  if (name === "Emblem") return "badge";
+  if (name === "Team Photo") return "team_photo";
+  if (name.includes("Stadium") || name.includes("Official")) return "special";
+  return "player";
 }
 
-// Sección FWC - Apertura (FWC1 - FWC8)
+// Build team groupings from sticker codes
+const teamCodes = new Set<string>();
+standardStickers.forEach((s) => {
+  const match = s.code.match(/^([A-Z]{2,3})\d+$/);
+  if (match && !["FWC", "CC"].includes(match[1])) {
+    teamCodes.add(match[1]);
+  }
+});
+
+// Group assignments based on the official album order
+const groupAssignments: Record<string, string> = {
+  MEX: "A", RSA: "A", KOR: "A", CZE: "A",
+  CAN: "E", BIH: "E", QAT: "E", SUI: "E",
+  BRA: "F", MAR: "F", HAI: "F", NZL: "F",
+  USA: "B", PAR: "B", AUS: "B", TUR: "B",
+  GER: "J", CUW: "J", CIV: "J", GHA: "J",
+  ECU: "G", FRA: "G", SEN: "G", IRQ: "G",
+  NED: "K", SWE: "K", NOR: "K",
+  JPN: "H", SCO: "H", COD: "H", ENG: "H", COL: "H",
+  TUN: "I", ESP: "I", CPV: "I", UZB: "I",
+  BEL: "L", EGY: "L", POR: "L", CRO: "L",
+  IRN: "J",
+  KSA: "C", URU: "C", JOR: "C", PAN: "C",
+  ARG: "D", ALG: "D", AUT: "D",
+};
+
+// Team display names
+const teamNames: Record<string, string> = {
+  MEX: "México", RSA: "Sudáfrica", KOR: "Corea del Sur", CZE: "República Checa",
+  CAN: "Canadá", BIH: "Bosnia y Herzegovina", QAT: "Catar", SUI: "Suiza",
+  BRA: "Brasil", MAR: "Marruecos", HAI: "Haití", NZL: "Nueva Zelanda",
+  USA: "Estados Unidos", PAR: "Paraguay", AUS: "Australia", TUR: "Turquía",
+  GER: "Alemania", CUW: "Curazao", CIV: "Costa de Marfil", GHA: "Ghana",
+  ECU: "Ecuador", FRA: "Francia", SEN: "Senegal", IRQ: "Irak",
+  NED: "Países Bajos", SWE: "Suecia", NOR: "Noruega",
+  JPN: "Japón", SCO: "Escocia", COD: "R.D. del Congo", ENG: "Inglaterra", COL: "Colombia",
+  TUN: "Túnez", ESP: "España", CPV: "Cabo Verde", UZB: "Uzbekistán",
+  BEL: "Bélgica", EGY: "Egipto", POR: "Portugal", CRO: "Croacia",
+  IRN: "Irán",
+  KSA: "Arabia Saudita", URU: "Uruguay", JOR: "Jordania", PAN: "Panamá",
+  ARG: "Argentina", ALG: "Argelia", AUT: "Austria",
+};
+
+// Build album order (maintain catalog order)
+const albumOrderTeams: string[] = [];
+standardStickers.forEach((s) => {
+  const match = s.code.match(/^([A-Z]{2,3})\d+$/);
+  if (match && !["FWC", "CC"].includes(match[1])) {
+    if (!albumOrderTeams.includes(match[1])) {
+      albumOrderTeams.push(match[1]);
+    }
+  }
+});
+
+// Special sticker for "00" Panini Logo
+const paniniLogo: Sticker = { code: "00", name: "Panini Logo", type: "special" };
+
+// Opening section (FWC1-FWC8)
 const openingSection: SpecialSection = {
   id: "fwc",
   name: "FIFA World Cup",
-  stickers: Array.from({ length: 8 }, (_, i) => ({
-    code: `FWC${i + 1}`,
-    name: `FWC${i + 1}`,
-    type: "foil" as const,
-  })),
+  stickers: standardStickers
+    .filter((s) => s.code.startsWith("FWC") && parseInt(s.code.replace("FWC", "")) <= 8)
+    .map((s) => ({ code: s.code, name: s.name, type: getStickerType(s.code, s.name) })),
 };
 
-// Equipos en el orden exacto de la planilla
-const teamsData: { name: string; code: string; group: string }[] = [
-  { name: "México", code: "MEX", group: "A" },
-  { name: "Sudáfrica", code: "RSA", group: "A" },
-  { name: "Corea del Sur", code: "KOR", group: "A" },
-  { name: "República Checa", code: "CZE", group: "A" },
-  { name: "Canadá", code: "CAN", group: "E" },
-  { name: "Bosnia y Herzegovina", code: "BIH", group: "E" },
-  { name: "Catar", code: "QAT", group: "E" },
-  { name: "Suiza", code: "SUI", group: "E" },
-  { name: "Brasil", code: "BRA", group: "F" },
-  { name: "Marruecos", code: "MAR", group: "F" },
-  { name: "Haití", code: "HAI", group: "F" },
-  { name: "Escocia", code: "SCO", group: "H" },
-  { name: "Estados Unidos", code: "USA", group: "B" },
-  { name: "Paraguay", code: "PAR", group: "B" },
-  { name: "Australia", code: "AUS", group: "B" },
-  { name: "Turquía", code: "TUR", group: "B" },
-  { name: "Alemania", code: "GER", group: "J" },
-  { name: "Costa de Marfil", code: "CIV", group: "J" },
-  { name: "Ecuador", code: "ECU", group: "G" },
-  { name: "Países Bajos", code: "NED", group: "K" },
-  { name: "Japón", code: "JPN", group: "H" },
-  { name: "Suecia", code: "SWE", group: "K" },
-  { name: "Túnez", code: "TUN", group: "I" },
-  { name: "Bélgica", code: "BEL", group: "L" },
-  { name: "Egipto", code: "EGY", group: "L" },
-  { name: "Irán", code: "IRN", group: "J" },
-  { name: "Nueva Zelanda", code: "NZL", group: "F" },
-  { name: "España", code: "ESP", group: "I" },
-  { name: "Cabo Verde", code: "CPV", group: "I" },
-  { name: "Arabia Saudita", code: "KSA", group: "C" },
-  { name: "Uruguay", code: "URU", group: "C" },
-  { name: "Francia", code: "FRA", group: "G" },
-  { name: "Senegal", code: "SEN", group: "G" },
-  { name: "Irak", code: "IRQ", group: "G" },
-  { name: "Noruega", code: "NOR", group: "K" },
-  { name: "Argentina", code: "ARG", group: "D" },
-  { name: "Argelia", code: "ALG", group: "D" },
-  { name: "Austria", code: "AUT", group: "D" },
-  { name: "Jordania", code: "JOR", group: "C" },
-  { name: "Portugal", code: "POR", group: "L" },
-  { name: "Colombia", code: "COD", group: "H" },
-  { name: "Uzbekistán", code: "UZB", group: "I" },
-  { name: "Chile", code: "COL", group: "H" },
-  { name: "Inglaterra", code: "ENG", group: "H" },
-  { name: "Croacia", code: "CRO", group: "L" },
-  { name: "Ghana", code: "GHA", group: "J" },
-  { name: "Panamá", code: "PAN", group: "C" },
-  // FWC section at bottom
-];
+// Add panini logo to opening
+openingSection.stickers.unshift(paniniLogo);
 
-// Re-order based on the image exactly - I'll use the exact order from the checklist image
-const teamsInAlbumOrder: { name: string; code: string; group: string }[] = [
-  { name: "México", code: "MEX", group: "A" },
-  { name: "Sudáfrica", code: "RSA", group: "A" },
-  { name: "Corea del Sur", code: "KOR", group: "A" },
-  { name: "República Checa", code: "CZE", group: "A" },
-  { name: "Canadá", code: "CAN", group: "E" },
-  { name: "Bosnia y Herzegovina", code: "BIH", group: "E" },
-  { name: "Catar", code: "QAT", group: "E" },
-  { name: "Suiza", code: "SUI", group: "E" },
-  { name: "Brasil", code: "BRA", group: "F" },
-  { name: "Marruecos", code: "MAR", group: "F" },
-  { name: "Haití", code: "HAI", group: "F" },
-  { name: "Escocia", code: "SCO", group: "H" },
-  { name: "Estados Unidos", code: "USA", group: "B" },
-  { name: "Paraguay", code: "PAR", group: "B" },
-  { name: "Australia", code: "AUS", group: "B" },
-  { name: "Turquía", code: "TUR", group: "B" },
-  { name: "Alemania", code: "GER", group: "J" },
-  { name: "Costa de Marfil", code: "CIV", group: "J" },
-  { name: "Ecuador", code: "ECU", group: "G" },
-  { name: "Países Bajos", code: "NED", group: "K" },
-  { name: "Japón", code: "JPN", group: "H" },
-  { name: "Suecia", code: "SWE", group: "K" },
-  { name: "Túnez", code: "TUN", group: "I" },
-  { name: "Bélgica", code: "BEL", group: "L" },
-  { name: "Egipto", code: "EGY", group: "L" },
-  { name: "Irán", code: "IRN", group: "J" },
-  { name: "Nueva Zelanda", code: "NZL", group: "F" },
-  { name: "España", code: "ESP", group: "I" },
-  { name: "Cabo Verde", code: "CPV", group: "I" },
-  { name: "Arabia Saudita", code: "KSA", group: "C" },
-  { name: "Uruguay", code: "URU", group: "C" },
-  { name: "Francia", code: "FRA", group: "G" },
-  { name: "Senegal", code: "SEN", group: "G" },
-  { name: "Irak", code: "IRQ", group: "G" },
-  { name: "Noruega", code: "NOR", group: "K" },
-  { name: "Argentina", code: "ARG", group: "D" },
-  { name: "Argelia", code: "ALG", group: "D" },
-  { name: "Austria", code: "AUT", group: "D" },
-  { name: "Jordania", code: "JOR", group: "C" },
-  { name: "Portugal", code: "POR", group: "L" },
-  { name: "R.D. del Congo", code: "COD", group: "H" },
-  { name: "Uzbekistán", code: "UZB", group: "I" },
-  { name: "Colombia", code: "COL", group: "H" },
-  { name: "Inglaterra", code: "ENG", group: "H" },
-  { name: "Croacia", code: "CRO", group: "L" },
-  { name: "Ghana", code: "GHA", group: "J" },
-  { name: "Panamá", code: "PAN", group: "C" },
-];
+// Team sections in album order
+const teamSections: TeamSection[] = albumOrderTeams.map((teamCode) => {
+  const teamStickers = standardStickers
+    .filter((s) => {
+      const match = s.code.match(/^([A-Z]{2,3})\d+$/);
+      return match && match[1] === teamCode;
+    })
+    .map((s) => ({
+      code: s.code,
+      name: s.name,
+      type: getStickerType(s.code, s.name),
+    }));
 
-// FWC bottom section (FWC9 - FWC19 based on image showing FWC9-FWC19)
+  return {
+    id: teamCode.toLowerCase(),
+    name: teamNames[teamCode] || teamCode,
+    code: teamCode,
+    group: groupAssignments[teamCode] || "?",
+    stickers: teamStickers,
+  };
+});
+
+// FWC History section (FWC9-FWC19)
 const fwcBottomSection: SpecialSection = {
   id: "fwc-bottom",
-  name: "FIFA World Cup (cont.)",
-  stickers: Array.from({ length: 11 }, (_, i) => ({
-    code: `FWC${i + 9}`,
-    name: `FWC${i + 9}`,
-    type: "foil" as const,
-  })),
+  name: "FIFA World Cup History",
+  stickers: standardStickers
+    .filter((s) => s.code.startsWith("FWC") && parseInt(s.code.replace("FWC", "")) >= 9)
+    .map((s) => ({ code: s.code, name: s.name, type: "foil" as const })),
 };
 
-// Coca-Cola section (CC1 - CC12)
+// Coca-Cola section (CC1-CC12, not CC-US/CC-UK regionals)
+const cocaColaStickers = standardStickers
+  .filter((s) => /^CC\d+$/.test(s.code))
+  .map((s) => ({ code: s.code, name: s.name, type: "special" as const }));
+
 const cocaColaSection: SpecialSection = {
   id: "coca-cola",
   name: "Coca-Cola Exclusivos",
-  stickers: Array.from({ length: 12 }, (_, i) => ({
-    code: `CC${i + 1}`,
-    name: `CC${i + 1}`,
-    type: "special" as const,
-  })),
+  stickers: cocaColaStickers,
 };
 
-const teamSections: TeamSection[] = teamsInAlbumOrder.map((team) => ({
-  id: team.code.toLowerCase(),
-  name: team.name,
-  code: team.code,
-  group: team.group,
-  stickers: generateTeamStickers(team.code),
-}));
+// Total count (excluding European shinies)
+const totalStickers =
+  openingSection.stickers.length +
+  teamSections.reduce((sum, t) => sum + t.stickers.length, 0) +
+  fwcBottomSection.stickers.length +
+  cocaColaSection.stickers.length;
 
 export const albumData = {
-  totalStickers: 8 + (47 * 20) + 11 + 12, // FWC top (8) + teams (47*20=940) + FWC bottom (11) + CC (12) = 971
-  // Adjusted: based on 980 total from official sources, the image shows 47 teams visible
-  // Let's calculate: FWC1-8 + 47 teams * 20 + FWC9-19 + CC1-12 = 8 + 940 + 11 + 12 = 971
-  // The missing team brings it closer. Using official 980.
+  totalStickers,
   packSize: 7,
   sections: {
     opening: openingSection,
@@ -188,13 +166,12 @@ export const albumData = {
 };
 
 export function getAllStickerCodes(): string[] {
-  const all: string[] = [
+  return [
     ...openingSection.stickers.map((s) => s.code),
     ...teamSections.flatMap((t) => t.stickers.map((s) => s.code)),
     ...fwcBottomSection.stickers.map((s) => s.code),
     ...cocaColaSection.stickers.map((s) => s.code),
   ];
-  return all;
 }
 
 export function getTeamsByGroup(group: string): TeamSection[] {

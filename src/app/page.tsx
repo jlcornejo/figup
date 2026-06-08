@@ -77,7 +77,8 @@ export default function Home() {
           t.name.toLowerCase().includes(q) ||
           t.code.toLowerCase().includes(q) ||
           t.group.toLowerCase() === q ||
-          `grupo ${t.group}`.toLowerCase().includes(q)
+          `grupo ${t.group}`.toLowerCase().includes(q) ||
+          t.stickers.some((s) => s.name.toLowerCase().includes(q))
       );
       return allTeams;
     }
@@ -185,7 +186,7 @@ export default function Home() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar equipo... (ej: Uruguay, ARG, Grupo D)"
+                placeholder="Buscar equipo o jugador... (ej: Messi, Uruguay, ARG)"
                 className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-9 py-2.5 text-sm
                   text-white placeholder:text-white/30 focus:outline-none focus:border-wc-teal/50 transition-colors"
               />

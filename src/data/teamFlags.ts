@@ -47,4 +47,5 @@ export const teamFlags: Record<string, string> = {
   CRO: "🇭🇷",
   GHA: "🇬🇭",
   PAN: "🇵🇦",
+  CUW: "🇨🇼",
 };
