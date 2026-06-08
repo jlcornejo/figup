@@ -10,44 +10,59 @@ export function Header({ totalOwned, totalStickers, totalDuplicates }: HeaderPro
   const percentage = Math.round((totalOwned / totalStickers) * 100);
 
   return (
-    <header className="sticky top-0 z-50 bg-panini-darker/95 backdrop-blur-sm border-b border-panini-border">
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-app-bg/80 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-panini-magenta to-panini-purple flex items-center justify-center">
-              <span className="text-lg font-bold">F</span>
+          {/* Logo - multicolor like the album cover */}
+          <div className="flex items-center gap-3">
+            <div className="relative w-11 h-11">
+              {/* Multicolor circles background */}
+              <div className="absolute inset-0 rounded-xl overflow-hidden">
+                <div className="absolute top-0 left-0 w-6 h-6 rounded-full bg-wc-red opacity-80" />
+                <div className="absolute top-0 right-0 w-5 h-5 rounded-full bg-wc-green opacity-80" />
+                <div className="absolute bottom-0 left-0 w-5 h-5 rounded-full bg-wc-skyblue opacity-80" />
+                <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-wc-orange opacity-80" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white text-sm font-black drop-shadow-md">26</span>
+                </div>
+              </div>
             </div>
             <div>
-              <h1 className="text-lg font-bold leading-tight">FigUp</h1>
-              <p className="text-[10px] text-panini-text-muted leading-tight">Mundial 2026</p>
+              <h1 className="text-xl font-black leading-tight tracking-tight">
+                <span className="text-wc-lime">Fig</span><span className="text-white">Up</span>
+              </h1>
+              <p className="text-[10px] text-app-text-muted leading-tight font-medium">
+                FIFA World Cup 2026™
+              </p>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center gap-4">
+          {/* Stats - hidden on mobile, shown on desktop */}
+          <div className="hidden sm:flex items-center gap-4">
             <div className="text-right">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-panini-text-muted">Tengo</span>
-                <span className="text-lg font-bold text-panini-turquoise">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl font-black text-wc-lime">
                   {totalOwned}
                 </span>
-                <span className="text-sm text-panini-text-muted">/ {totalStickers}</span>
+                <span className="text-xs text-app-text-muted font-medium">/ {totalStickers}</span>
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                <div className="flex-1 h-1.5 bg-panini-dark rounded-full w-32 overflow-hidden">
+                <div className="h-2.5 bg-white/10 rounded-full w-28 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-panini-turquoise to-panini-lime rounded-full progress-fill"
-                    style={{ width: `${percentage}%` }}
+                    className="h-full rounded-full progress-fill"
+                    style={{
+                      width: `${percentage}%`,
+                      background: `linear-gradient(90deg, #2ecc71, #f1c40f)`,
+                    }}
                   />
                 </div>
-                <span className="text-xs font-medium text-panini-turquoise">{percentage}%</span>
+                <span className="text-[11px] font-bold text-wc-lime">{percentage}%</span>
               </div>
             </div>
             {totalDuplicates > 0 && (
-              <div className="border-l border-panini-border pl-3">
-                <span className="text-xs text-panini-text-muted">Repetidas</span>
-                <p className="text-sm font-bold text-panini-gold">{totalDuplicates}</p>
+              <div className="border-l border-white/15 pl-3">
+                <span className="text-[10px] text-app-text-muted">Repes</span>
+                <p className="text-sm font-black text-wc-gold-light">{totalDuplicates}</p>
               </div>
             )}
           </div>

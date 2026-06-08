@@ -1,21 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  /* Paleta inspirada en el álbum Panini World Cup 2026 */
-  --color-panini-dark: #1a1035;
-  --color-panini-darker: #0f0a20;
-  --color-panini-purple: #6b21a8;
-  --color-panini-magenta: #e91e8c;
-  --color-panini-coral: #ff6b6b;
-  --color-panini-turquoise: #06d6a0;
-  --color-panini-lime: #a8e600;
-  --color-panini-gold: #ffd700;
-  --color-panini-blue: #3b82f6;
-  --color-panini-card: #251a45;
-  --color-panini-card-hover: #2d2050;
-  --color-panini-border: #3d2a6e;
-  --color-panini-text: #f0e6ff;
-  --color-panini-text-muted: #9b8ab8;
+  /* Album cover palette - the multicolor organic shapes */
+  --color-wc-blue: #4a69bd;
+  --color-wc-purple: #5b4a9e;
+  --color-wc-red: #d63031;
+  --color-wc-orange: #e17055;
+  --color-wc-coral: #e66767;
+  --color-wc-green: #78b84a;
+  --color-wc-lime: #c4d84a;
+  --color-wc-teal: #4ecbdf;
+  --color-wc-skyblue: #74b9e8;
+  --color-wc-magenta: #c44dbb;
+  --color-wc-gold: #d4982a;
+  --color-wc-gold-light: #f5c842;
+
+  /* App surfaces */
+  --color-app-bg: #3d3a8c;
+  --color-app-surface: #4a4699;
+  --color-app-surface-hover: #5753a6;
+  --color-app-border: #6360b3;
+  --color-app-text: #f0ecff;
+  --color-app-text-muted: #b0a8d4;
+
+  /* Sticker specific */
+  --color-sticker-empty-bg: rgba(255, 255, 255, 0.12);
+  --color-sticker-empty-border: rgba(255, 255, 255, 0.25);
+  --color-sticker-owned-bg: #ffffff;
+  --color-sticker-green: #2ecc71;
+  --color-sticker-gold: #f1c40f;
+}
+
+body {
+  background: linear-gradient(135deg, #3d3a8c 0%, #4a3f8f 30%, #5b4a9e 60%, #4a69bd 100%);
+  min-height: 100vh;
 }
 
 /* Custom scrollbar */
@@ -23,20 +41,38 @@
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-panini-darker);
+  background: rgba(0, 0, 0, 0.2);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-panini-border);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
 
-/* Sticker card glow effect */
-.sticker-owned {
-  box-shadow: 0 0 12px rgba(6, 214, 160, 0.3);
+/* Album multicolor organic background */
+.album-shapes-bg {
+  position: relative;
+}
+.album-shapes-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 140px 140px at 5% 10%, rgba(214, 48, 49, 0.2) 0%, transparent 70%),
+    radial-gradient(ellipse 120px 120px at 95% 5%, rgba(120, 184, 74, 0.2) 0%, transparent 70%),
+    radial-gradient(ellipse 100px 100px at 80% 90%, rgba(225, 112, 85, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 160px 160px at 15% 85%, rgba(78, 203, 223, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 130px 130px at 50% 50%, rgba(196, 77, 187, 0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 90px 90px at 70% 30%, rgba(196, 216, 74, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.sticker-duplicate {
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+/* Sticker card styles */
+.sticker-card {
+  transition: all 0.15s ease;
+}
+.sticker-card:active {
+  transform: scale(0.93);
 }
 
 /* Progress bar animation */
@@ -44,18 +80,20 @@
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Album page turn effect */
+/* Page sections */
 .album-section {
   animation: fadeSlideIn 0.3s ease-out;
 }
 
 @keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Floating shapes decorative */
+.shape-circle {
+  border-radius: 50%;
+  position: absolute;
+  opacity: 0.15;
+  pointer-events: none;
 }

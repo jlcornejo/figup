@@ -6,10 +6,14 @@ export const metadata: Metadata = {
   description:
     "Controlá tu colección de figuritas del álbum Panini FIFA World Cup 2026. Marcá las que tenés, las repetidas, y completá tu álbum.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1a1035",
+  themeColor: "#3d3a8c",
 };
 
 export default function RootLayout({
@@ -19,8 +23,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="bg-panini-darker text-panini-text min-h-screen antialiased">
-        {children}
+      <body className="text-app-text min-h-screen antialiased album-shapes-bg">
+        <div className="relative z-10">
+          {children}
+        </div>
       </body>
     </html>
   );

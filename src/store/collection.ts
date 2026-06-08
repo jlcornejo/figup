@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
 
 export interface CollectionState {
   /** Map of sticker code → quantity owned (0 = not owned) */
@@ -10,6 +9,17 @@ export interface CollectionState {
 }
 
 const STORAGE_KEY = "figup-collection";
+const DEVICE_ID_KEY = "figup-device-id";
+
+function getOrCreateDeviceId(): string {
+  if (typeof window === "undefined") return "server";
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
 
 function loadFromLocalStorage(): CollectionState {
   if (typeof window === "undefined") return { stickers: {} };
@@ -33,41 +43,30 @@ function saveToLocalStorage(state: CollectionState) {
 export function useCollection() {
   const [collection, setCollection] = useState<CollectionState>({ stickers: {} });
   const [isLoaded, setIsLoaded] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deviceId = useRef<string>("server");
 
-  // Listen to auth state
+  // Load collection on mount
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) return;
+    deviceId.current = getOrCreateDeviceId();
 
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Load collection: from Supabase if logged in, else localStorage
-  useEffect(() => {
     async function load() {
-      if (user && supabase) {
+      if (isSupabaseConfigured && supabase) {
+        // Try to load from Supabase using device_id
         const { data, error } = await supabase
           .from("collections")
           .select("sticker_code, quantity")
-          .eq("user_id", user.id);
+          .eq("device_id", deviceId.current);
 
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
           const stickers: Record<string, number> = {};
           data.forEach((row) => {
             stickers[row.sticker_code] = row.quantity;
           });
           setCollection({ stickers });
         } else {
+          // Fallback to localStorage
           setCollection(loadFromLocalStorage());
         }
       } else {
@@ -76,30 +75,30 @@ export function useCollection() {
       setIsLoaded(true);
     }
     load();
-  }, [user]);
+  }, []);
 
-  // Save: always to localStorage, and debounced to Supabase if logged in
+  // Save on every change
   useEffect(() => {
     if (!isLoaded) return;
     saveToLocalStorage(collection);
 
-    if (user) {
-      // Debounce sync to Supabase (wait 1s after last change)
+    if (isSupabaseConfigured && supabase) {
       if (syncTimeout.current) clearTimeout(syncTimeout.current);
       syncTimeout.current = setTimeout(() => {
-        syncToSupabase(user.id, collection);
-      }, 1000);
+        syncToSupabase(deviceId.current, collection);
+      }, 800);
     }
-  }, [collection, isLoaded, user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collection, isLoaded]);
 
-  async function syncToSupabase(userId: string, state: CollectionState) {
+  async function syncToSupabase(devId: string, state: CollectionState) {
     if (!supabase) return;
     setIsSyncing(true);
     try {
       const upserts = Object.entries(state.stickers)
         .filter(([, qty]) => qty > 0)
         .map(([code, qty]) => ({
-          user_id: userId,
+          device_id: devId,
           sticker_code: code,
           quantity: qty,
         }));
@@ -107,13 +106,14 @@ export function useCollection() {
       if (upserts.length > 0) {
         await supabase
           .from("collections")
-          .upsert(upserts, { onConflict: "user_id,sticker_code" });
+          .upsert(upserts, { onConflict: "device_id,sticker_code" });
       }
 
+      // Remove stickers deleted locally
       const { data: existing } = await supabase
         .from("collections")
         .select("sticker_code")
-        .eq("user_id", userId);
+        .eq("device_id", devId);
 
       if (existing) {
         const toDelete = existing
@@ -124,12 +124,12 @@ export function useCollection() {
           await supabase
             .from("collections")
             .delete()
-            .eq("user_id", userId)
+            .eq("device_id", devId)
             .in("sticker_code", toDelete);
         }
       }
     } catch {
-      // Silent fail, data is still in localStorage
+      // Silent fail — data safe in localStorage
     }
     setIsSyncing(false);
   }
@@ -203,7 +203,6 @@ export function useCollection() {
   return {
     collection,
     isLoaded,
-    user,
     isSyncing,
     addSticker,
     removeSticker,
