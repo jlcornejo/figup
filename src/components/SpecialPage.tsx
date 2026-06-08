@@ -10,6 +10,7 @@ interface SpecialPageProps {
   onRemove: (code: string) => void;
   onCameraClick?: (code: string) => void;
   onImageClick?: (code: string) => void;
+  onInfoClick?: (code: string) => void;
   getImage?: (code: string) => string | null;
   ownedCount: number;
 }
@@ -20,7 +21,7 @@ const sectionStyles: Record<string, { gradient: string; icon: string }> = {
   "coca-cola": { gradient: "from-wc-red via-wc-coral to-wc-red", icon: "🥤" },
 };
 
-export function SpecialPage({ section, getQuantity, onAdd, onRemove, onCameraClick, onImageClick, getImage, ownedCount }: SpecialPageProps) {
+export function SpecialPage({ section, getQuantity, onAdd, onRemove, onCameraClick, onImageClick, onInfoClick, getImage, ownedCount }: SpecialPageProps) {
   const total = section.stickers.length;
   const percentage = total > 0 ? Math.round((ownedCount / total) * 100) : 0;
   const isComplete = ownedCount === total && total > 0;
@@ -68,6 +69,7 @@ export function SpecialPage({ section, getQuantity, onAdd, onRemove, onCameraCli
                 onRemove={() => onRemove(sticker.code)}
                 onCameraClick={onCameraClick ? () => onCameraClick(sticker.code) : undefined}
                 onImageClick={onImageClick ? () => onImageClick(sticker.code) : undefined}
+                onInfoClick={onInfoClick ? () => onInfoClick(sticker.code) : undefined}
                 image={getImage ? getImage(sticker.code) : null}
               />
             ))}
