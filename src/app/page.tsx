@@ -5,6 +5,7 @@ import { albumData, TeamSection } from "@/data/album";
 import { useAuth } from "@/store/auth";
 import { useCollection } from "@/store/collection";
 import { useStickerImages } from "@/store/stickerImages";
+import { useWikiImages } from "@/store/wikiImages";
 import { Header } from "@/components/Header";
 import { Sidebar, ViewFilter, SectionView } from "@/components/Sidebar";
 import { TeamPage } from "@/components/TeamPage";
@@ -40,6 +41,36 @@ export default function Home() {
   const [playerDetailCode, setPlayerDetailCode] = useState<string | null>(null);
 
   const { getImage, setImage, removeImage } = useStickerImages();
+
+  // Get list of all owned sticker codes for wiki image fetching
+  const allOwnedCodes = useMemo(() => {
+    const codes: string[] = [];
+    for (const team of albumData.sections.teams) {
+      for (const s of team.stickers) {
+        if (isOwned(s.code)) codes.push(s.code);
+      }
+    }
+    for (const s of albumData.sections.opening.stickers) {
+      if (isOwned(s.code)) codes.push(s.code);
+    }
+    for (const s of albumData.sections.fwcBottom.stickers) {
+      if (isOwned(s.code)) codes.push(s.code);
+    }
+    for (const s of albumData.sections.cocaCola.stickers) {
+      if (isOwned(s.code)) codes.push(s.code);
+    }
+    return codes;
+  }, [isOwned, getTotalOwned]);
+
+  const { getWikiImage } = useWikiImages(allOwnedCodes, getImage);
+
+  // Combined image getter: user captured image > wiki image
+  const getBestImage = useCallback(
+    (code: string): string | null => {
+      return getImage(code) || getWikiImage(code);
+    },
+    [getImage, getWikiImage]
+  );
 
   const totalOwned = useMemo(() => getTotalOwned(), [getTotalOwned]);
   const totalDuplicates = useMemo(() => getTotalDuplicates(), [getTotalDuplicates]);
@@ -230,7 +261,7 @@ export default function Home() {
                 onCameraClick={(code) => setCameraTarget(code)}
                 onImageClick={(code) => setZoomTarget(code)}
                 onInfoClick={(code) => setPlayerDetailCode(code)}
-                getImage={getImage}
+                getImage={getBestImage}
                 ownedCount={getOwnedInRange(
                   albumData.sections.opening.stickers.map((s) => s.code)
                 )}
@@ -257,7 +288,7 @@ export default function Home() {
                     onCameraClick={(code) => setCameraTarget(code)}
                 onImageClick={(code) => setZoomTarget(code)}
                 onInfoClick={(code) => setPlayerDetailCode(code)}
-                    getImage={getImage}
+                    getImage={getBestImage}
                     ownedCount={getOwnedInRange(
                       team.stickers.map((s) => s.code)
                     )}
@@ -280,7 +311,7 @@ export default function Home() {
                 onCameraClick={(code) => setCameraTarget(code)}
                 onImageClick={(code) => setZoomTarget(code)}
                 onInfoClick={(code) => setPlayerDetailCode(code)}
-                getImage={getImage}
+                getImage={getBestImage}
                 ownedCount={getOwnedInRange(
                   albumData.sections.fwcBottom.stickers.map((s) => s.code)
                 )}
@@ -302,7 +333,7 @@ export default function Home() {
                 onCameraClick={(code) => setCameraTarget(code)}
                 onImageClick={(code) => setZoomTarget(code)}
                 onInfoClick={(code) => setPlayerDetailCode(code)}
-                getImage={getImage}
+                getImage={getBestImage}
                 ownedCount={getOwnedInRange(
                   albumData.sections.cocaCola.stickers.map((s) => s.code)
                 )}
@@ -338,10 +369,10 @@ export default function Home() {
       )}
 
       {/* Zoom modal */}
-      {zoomTarget && getImage(zoomTarget) && (
+      {zoomTarget && getBestImage(zoomTarget) && (
         <StickerZoom
           code={zoomTarget}
-          image={getImage(zoomTarget)!}
+          image={getBestImage(zoomTarget)!}
           onClose={() => setZoomTarget(null)}
           onRetake={() => {
             setZoomTarget(null);
@@ -358,7 +389,7 @@ export default function Home() {
       {playerDetailCode && (
         <PlayerDetail
           stickerCode={playerDetailCode}
-          image={getImage(playerDetailCode)}
+          image={getBestImage(playerDetailCode)}
           onClose={() => setPlayerDetailCode(null)}
         />
       )}

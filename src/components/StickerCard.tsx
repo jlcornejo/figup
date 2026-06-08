@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useState, useEffect } from "react";
+import { useRef, useCallback } from "react";
 import { Sticker } from "@/data/album";
 
 interface StickerCardProps {
@@ -22,26 +22,6 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
   const duplicate = quantity > 1;
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didLongPress = useRef(false);
-  const [showActions, setShowActions] = useState(false);
-  const actionsRef = useRef<HTMLDivElement>(null);
-
-  // Close actions popup when clicking outside
-  useEffect(() => {
-    if (!showActions) return;
-    const handleOutside = (e: PointerEvent) => {
-      if (actionsRef.current && !actionsRef.current.contains(e.target as Node)) {
-        setShowActions(false);
-      }
-    };
-    // Small delay to avoid the same tap closing it immediately
-    const timer = setTimeout(() => {
-      document.addEventListener("pointerdown", handleOutside);
-    }, 50);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener("pointerdown", handleOutside);
-    };
-  }, [showActions]);
 
   const startPress = useCallback(() => {
     didLongPress.current = false;
@@ -63,18 +43,12 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
       didLongPress.current = false;
       return;
     }
-    if (owned) {
-      // On owned stickers, show actions popup (mobile-friendly)
-      setShowActions(true);
-    } else {
-      // On empty stickers, add directly
-      onAdd();
-    }
-  }, [onAdd, owned]);
+    onAdd();
+  }, [onAdd]);
 
   return (
     <div className="sticker-card relative select-none group">
-      {/* Main sticker area */}
+      {/* Main sticker area — click to add */}
       <div
         className={`
           rounded-xl aspect-[3/4] flex flex-col items-center justify-center text-center overflow-hidden
@@ -85,20 +59,18 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
               : "bg-white border-sticker-green/60 shadow-lg shadow-green-400/15"
             : "border-dashed border-white/15 hover:border-white/30 bg-white/[0.04] hover:bg-white/[0.08]"
           }
-          ${showActions && owned ? "ring-2 ring-wc-purple/60 scale-105" : ""}
         `}
         onClick={handleClick}
         onContextMenu={(e) => {
           e.preventDefault();
-          if (owned) setShowActions(true);
-          else onRemove();
+          onRemove();
         }}
-        onTouchStart={!owned ? startPress : undefined}
-        onTouchEnd={!owned ? endPress : undefined}
-        onTouchCancel={!owned ? endPress : undefined}
-        onMouseDown={!owned ? startPress : undefined}
-        onMouseUp={!owned ? endPress : undefined}
-        onMouseLeave={!owned ? endPress : undefined}
+        onTouchStart={startPress}
+        onTouchEnd={endPress}
+        onTouchCancel={endPress}
+        onMouseDown={startPress}
+        onMouseUp={endPress}
+        onMouseLeave={endPress}
       >
         {owned && image ? (
           <div className="w-full h-full relative">
@@ -146,68 +118,12 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
         )}
       </div>
 
-      {/* Actions popup — shown on tap (mobile) or hover (desktop) */}
-      {showActions && owned && (
-        <div
-          ref={actionsRef}
-          className="absolute z-50 -bottom-2 left-1/2 -translate-x-1/2 translate-y-full
-            flex items-center gap-1 bg-[#1e1b3a] border border-white/15 rounded-xl px-2 py-1.5 shadow-xl shadow-black/40"
-        >
-          {/* Add more */}
-          <button
-            onClick={(e) => { e.stopPropagation(); onAdd(); setShowActions(false); }}
-            className="w-7 h-7 rounded-full bg-wc-green/90 text-white text-xs font-bold flex items-center justify-center active:scale-90 transition-transform"
-            title="Sumar"
-          >
-            +
-          </button>
-          {/* Remove */}
-          <button
-            onClick={(e) => { e.stopPropagation(); onRemove(); setShowActions(false); }}
-            className="w-7 h-7 rounded-full bg-wc-red/90 text-white text-xs font-bold flex items-center justify-center active:scale-90 transition-transform"
-            title="Quitar"
-          >
-            −
-          </button>
-          {/* Info */}
-          {onInfoClick && sticker.type === "player" && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onInfoClick(); setShowActions(false); }}
-              className="w-7 h-7 rounded-full bg-wc-purple/90 text-white text-[10px] flex items-center justify-center active:scale-90 transition-transform"
-              title="Info"
-            >
-              ℹ
-            </button>
-          )}
-          {/* View image */}
-          {image && onImageClick && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onImageClick(); setShowActions(false); }}
-              className="w-7 h-7 rounded-full bg-white/80 text-black text-[10px] flex items-center justify-center active:scale-90 transition-transform"
-              title="Ver"
-            >
-              🔍
-            </button>
-          )}
-          {/* Camera */}
-          {onCameraClick && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onCameraClick(); setShowActions(false); }}
-              className="w-7 h-7 rounded-full bg-wc-teal/90 text-white text-[10px] flex items-center justify-center active:scale-90 transition-transform"
-              title="Foto"
-            >
-              📷
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Desktop hover buttons (hidden on touch devices) */}
-      {owned && !showActions && (
-        <div className="absolute -bottom-1 left-0 right-0 hidden sm:flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Action buttons — always visible on mobile for owned stickers, hover on desktop */}
+      {owned && (
+        <div className="flex items-center justify-center gap-0.5 mt-1 sm:absolute sm:-bottom-1 sm:left-0 sm:right-0 sm:mt-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <button
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
-            className="w-5 h-5 rounded-full bg-wc-red/90 text-white text-[10px] font-bold flex items-center justify-center hover:bg-wc-red shadow-sm"
+            className="w-5 h-5 rounded-full bg-wc-red/90 text-white text-[10px] font-bold flex items-center justify-center active:scale-90 hover:bg-wc-red shadow-sm"
             title="Quitar"
           >
             −
@@ -215,8 +131,8 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
           {onInfoClick && sticker.type === "player" && (
             <button
               onClick={(e) => { e.stopPropagation(); onInfoClick(); }}
-              className="w-5 h-5 rounded-full bg-wc-purple/90 text-white text-[9px] flex items-center justify-center hover:bg-wc-purple shadow-sm"
-              title="Info del jugador"
+              className="w-5 h-5 rounded-full bg-wc-purple/90 text-white text-[9px] flex items-center justify-center active:scale-90 hover:bg-wc-purple shadow-sm"
+              title="Info"
             >
               ℹ
             </button>
@@ -224,8 +140,8 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
           {image && onImageClick && (
             <button
               onClick={(e) => { e.stopPropagation(); onImageClick(); }}
-              className="w-5 h-5 rounded-full bg-white/80 text-black text-[9px] flex items-center justify-center hover:bg-white shadow-sm"
-              title="Ver imagen"
+              className="w-5 h-5 rounded-full bg-white/80 text-black text-[9px] flex items-center justify-center active:scale-90 hover:bg-white shadow-sm"
+              title="Ver"
             >
               🔍
             </button>
@@ -233,16 +149,16 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
           {onCameraClick && (
             <button
               onClick={(e) => { e.stopPropagation(); onCameraClick(); }}
-              className="w-5 h-5 rounded-full bg-wc-teal/90 text-white text-[9px] flex items-center justify-center hover:bg-wc-teal shadow-sm"
-              title="Capturar foto"
+              className="w-5 h-5 rounded-full bg-wc-teal/90 text-white text-[9px] flex items-center justify-center active:scale-90 hover:bg-wc-teal shadow-sm"
+              title="Foto"
             >
               📷
             </button>
           )}
           <button
             onClick={(e) => { e.stopPropagation(); onAdd(); }}
-            className="w-5 h-5 rounded-full bg-wc-green/90 text-white text-[10px] font-bold flex items-center justify-center hover:bg-wc-green shadow-sm"
-            title="Sumar repetida"
+            className="w-5 h-5 rounded-full bg-wc-green/90 text-white text-[10px] font-bold flex items-center justify-center active:scale-90 hover:bg-wc-green shadow-sm"
+            title="Sumar"
           >
             +
           </button>
