@@ -10,13 +10,14 @@ interface StickerCardProps {
   onRemove: () => void;
   onCameraClick?: () => void;
   onImageClick?: () => void;
+  onInfoClick?: () => void;
   image?: string | null;
   teamColor?: string;
 }
 
 const LONG_PRESS_MS = 500;
 
-export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick, onImageClick, image, teamColor }: StickerCardProps) {
+export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick, onImageClick, onInfoClick, image, teamColor }: StickerCardProps) {
   const owned = quantity > 0;
   const duplicate = quantity > 1;
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -139,6 +140,16 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
           >
             −
           </button>
+          {/* Info button */}
+          {onInfoClick && sticker.type === "player" && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onInfoClick(); }}
+              className="w-5 h-5 rounded-full bg-purple-500/80 text-white text-[9px] flex items-center justify-center hover:bg-purple-500 shadow-sm"
+              title="Info del jugador"
+            >
+              ℹ
+            </button>
+          )}
           {/* Zoom/view image */}
           {image && onImageClick && (
             <button

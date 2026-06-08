@@ -15,6 +15,7 @@ import { StickerZoom } from "@/components/StickerZoom";
 import { MobileNav } from "@/components/MobileNav";
 import { LoginScreen } from "@/components/LoginScreen";
 import { UserMenu } from "@/components/UserMenu";
+import { PlayerDetail } from "@/components/PlayerDetail";
 
 export default function Home() {
   const { user, profile, isLoading: authLoading, isAuthenticated, signInWithGoogle, signInWithEmail, signOut } = useAuth();
@@ -36,6 +37,7 @@ export default function Home() {
   const [cameraTarget, setCameraTarget] = useState<string | null>(null);
   const [zoomTarget, setZoomTarget] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [playerDetailCode, setPlayerDetailCode] = useState<string | null>(null);
 
   const { getImage, setImage, removeImage } = useStickerImages();
 
@@ -226,6 +228,7 @@ export default function Home() {
                 onRemove={removeSticker}
                 onCameraClick={(code) => setCameraTarget(code)}
                 onImageClick={(code) => setZoomTarget(code)}
+                onInfoClick={(code) => setPlayerDetailCode(code)}
                 getImage={getImage}
                 ownedCount={getOwnedInRange(
                   albumData.sections.opening.stickers.map((s) => s.code)
@@ -252,6 +255,7 @@ export default function Home() {
                     onRemove={removeSticker}
                     onCameraClick={(code) => setCameraTarget(code)}
                 onImageClick={(code) => setZoomTarget(code)}
+                onInfoClick={(code) => setPlayerDetailCode(code)}
                     getImage={getImage}
                     ownedCount={getOwnedInRange(
                       team.stickers.map((s) => s.code)
@@ -274,6 +278,7 @@ export default function Home() {
                 onRemove={removeSticker}
                 onCameraClick={(code) => setCameraTarget(code)}
                 onImageClick={(code) => setZoomTarget(code)}
+                onInfoClick={(code) => setPlayerDetailCode(code)}
                 getImage={getImage}
                 ownedCount={getOwnedInRange(
                   albumData.sections.fwcBottom.stickers.map((s) => s.code)
@@ -295,6 +300,7 @@ export default function Home() {
                 onRemove={removeSticker}
                 onCameraClick={(code) => setCameraTarget(code)}
                 onImageClick={(code) => setZoomTarget(code)}
+                onInfoClick={(code) => setPlayerDetailCode(code)}
                 getImage={getImage}
                 ownedCount={getOwnedInRange(
                   albumData.sections.cocaCola.stickers.map((s) => s.code)
@@ -344,6 +350,14 @@ export default function Home() {
             removeImage(zoomTarget);
             setZoomTarget(null);
           }}
+        />
+      )}
+
+      {/* Player detail modal */}
+      {playerDetailCode && (
+        <PlayerDetail
+          stickerCode={playerDetailCode}
+          onClose={() => setPlayerDetailCode(null)}
         />
       )}
     </div>

@@ -12,11 +12,12 @@ interface TeamPageProps {
   onRemove: (code: string) => void;
   onCameraClick?: (code: string) => void;
   onImageClick?: (code: string) => void;
+  onInfoClick?: (code: string) => void;
   getImage?: (code: string) => string | null;
   ownedCount: number;
 }
 
-export function TeamPage({ team, getQuantity, onAdd, onRemove, onCameraClick, onImageClick, getImage, ownedCount }: TeamPageProps) {
+export function TeamPage({ team, getQuantity, onAdd, onRemove, onCameraClick, onImageClick, onInfoClick, getImage, ownedCount }: TeamPageProps) {
   const total = team.stickers.length;
   const percentage = Math.round((ownedCount / total) * 100);
   const isComplete = ownedCount === total;
@@ -104,6 +105,7 @@ export function TeamPage({ team, getQuantity, onAdd, onRemove, onCameraClick, on
                 onRemove={() => onRemove(sticker.code)}
                 onCameraClick={onCameraClick ? () => onCameraClick(sticker.code) : undefined}
                 onImageClick={onImageClick ? () => onImageClick(sticker.code) : undefined}
+                onInfoClick={onInfoClick ? () => onInfoClick(sticker.code) : undefined}
                 image={getImage ? getImage(sticker.code) : null}
                 teamColor={colors.primary}
               />
