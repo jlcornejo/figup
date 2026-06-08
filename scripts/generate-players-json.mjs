@@ -10,6 +10,9 @@
 import { writeFileSync } from "fs";
 import { teamsBatch2 } from "./teams-batch2.mjs";
 import { teamsBatch3 } from "./teams-batch3.mjs";
+import { teamsBatch4a } from "./teams-batch4a.mjs";
+import { teamsBatch4b } from "./teams-batch4b.mjs";
+import { teamsBatch4c } from "./teams-batch4c.mjs";
 
 // All 48 teams parsed from Wikipedia rendered page
 // Format: [shirtNumber, position, name, dob, age, caps, goals, club, clubCountry, isCaptain]
@@ -352,7 +355,7 @@ const teamsRaw = {
 };
 
 // Merge all batches
-const allTeamsRaw = { ...teamsRaw, ...teamsBatch2, ...teamsBatch3 };
+const allTeamsRaw = { ...teamsRaw, ...teamsBatch2, ...teamsBatch3, ...teamsBatch4a, ...teamsBatch4b, ...teamsBatch4c };
 
 // Build output
 const allPlayers = [];
@@ -366,6 +369,10 @@ const teamNameMap = {
   TUR: "Turkey", NED: "Netherlands", CRO: "Croatia", BEL: "Belgium",
   URU: "Uruguay", COL: "Colombia", JPN: "Japan", SWE: "Sweden",
   NOR: "Norway", SEN: "Senegal", ALG: "Algeria", AUT: "Austria",
+  IRN: "Iran", NZL: "New Zealand", CPV: "Cape Verde", KSA: "Saudi Arabia",
+  JOR: "Jordan", IRQ: "Iraq", ECU: "Ecuador", CIV: "Ivory Coast",
+  CUW: "Curaçao", EGY: "Egypt", GHA: "Ghana", PAN: "Panama",
+  COD: "DR Congo", UZB: "Uzbekistan", TUN: "Tunisia",
 };
 
 for (const [teamCode, players] of Object.entries(allTeamsRaw)) {

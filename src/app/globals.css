@@ -1,39 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  /* Album cover palette - the multicolor organic shapes */
-  --color-wc-blue: #4a69bd;
-  --color-wc-purple: #5b4a9e;
-  --color-wc-red: #d63031;
-  --color-wc-orange: #e17055;
-  --color-wc-coral: #e66767;
-  --color-wc-green: #78b84a;
-  --color-wc-lime: #c4d84a;
-  --color-wc-teal: #4ecbdf;
-  --color-wc-skyblue: #74b9e8;
-  --color-wc-magenta: #c44dbb;
-  --color-wc-gold: #d4982a;
-  --color-wc-gold-light: #f5c842;
+  /* FIFA WC 2026 vibrant palette */
+  --color-wc-blue: #2d46b9;
+  --color-wc-purple: #7b2ff7;
+  --color-wc-red: #e01e37;
+  --color-wc-orange: #f77f00;
+  --color-wc-coral: #ff6b6b;
+  --color-wc-green: #38b000;
+  --color-wc-lime: #ccff00;
+  --color-wc-teal: #00c9db;
+  --color-wc-skyblue: #4cc9f0;
+  --color-wc-magenta: #d63384;
+  --color-wc-gold: #ffc300;
+  --color-wc-gold-light: #ffd60a;
 
-  /* App surfaces */
-  --color-app-bg: #3d3a8c;
-  --color-app-surface: #4a4699;
-  --color-app-surface-hover: #5753a6;
-  --color-app-border: #6360b3;
-  --color-app-text: #f0ecff;
-  --color-app-text-muted: #b0a8d4;
+  /* App surfaces - dark with vibrancy */
+  --color-app-bg: #0f0f23;
+  --color-app-surface: rgba(255, 255, 255, 0.04);
+  --color-app-surface-hover: rgba(255, 255, 255, 0.08);
+  --color-app-border: rgba(255, 255, 255, 0.1);
+  --color-app-text: #f8f8ff;
+  --color-app-text-muted: #a0a0c0;
 
   /* Sticker specific */
-  --color-sticker-empty-bg: rgba(255, 255, 255, 0.12);
-  --color-sticker-empty-border: rgba(255, 255, 255, 0.25);
+  --color-sticker-empty-bg: rgba(255, 255, 255, 0.06);
+  --color-sticker-empty-border: rgba(255, 255, 255, 0.15);
   --color-sticker-owned-bg: #ffffff;
-  --color-sticker-green: #2ecc71;
-  --color-sticker-gold: #f1c40f;
+  --color-sticker-green: #38b000;
+  --color-sticker-gold: #ffd60a;
 }
 
+/* Base body - deep dark with colorful accents */
 body {
-  background: linear-gradient(135deg, #3d3a8c 0%, #4a3f8f 30%, #5b4a9e 60%, #4a69bd 100%);
+  background: #0f0f23;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Custom scrollbar */
@@ -41,14 +43,14 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, #7b2ff7, #e01e37);
   border-radius: 3px;
 }
 
-/* Album multicolor organic background */
+/* Vibrant multicolor animated background */
 .album-shapes-bg {
   position: relative;
 }
@@ -57,22 +59,86 @@ body {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 140px 140px at 5% 10%, rgba(214, 48, 49, 0.2) 0%, transparent 70%),
-    radial-gradient(ellipse 120px 120px at 95% 5%, rgba(120, 184, 74, 0.2) 0%, transparent 70%),
-    radial-gradient(ellipse 100px 100px at 80% 90%, rgba(225, 112, 85, 0.15) 0%, transparent 70%),
-    radial-gradient(ellipse 160px 160px at 15% 85%, rgba(78, 203, 223, 0.15) 0%, transparent 70%),
-    radial-gradient(ellipse 130px 130px at 50% 50%, rgba(196, 77, 187, 0.1) 0%, transparent 70%),
-    radial-gradient(ellipse 90px 90px at 70% 30%, rgba(196, 216, 74, 0.12) 0%, transparent 70%);
+    /* Large colorful blobs - WC 2026 style */
+    radial-gradient(ellipse 350px 350px at 0% 0%, rgba(123, 47, 247, 0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 100% 0%, rgba(224, 30, 55, 0.2) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 300px at 100% 100%, rgba(56, 176, 0, 0.2) 0%, transparent 70%),
+    radial-gradient(ellipse 350px 350px at 0% 100%, rgba(0, 201, 219, 0.2) 0%, transparent 70%),
+    radial-gradient(ellipse 200px 200px at 50% 50%, rgba(247, 127, 0, 0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 250px 250px at 30% 70%, rgba(255, 195, 0, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 200px 200px at 70% 30%, rgba(204, 255, 0, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: bgPulse 12s ease-in-out infinite alternate;
+}
+.album-shapes-bg::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  /* Geometric mesh overlay */
+  background-image:
+    linear-gradient(30deg, rgba(123, 47, 247, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(123, 47, 247, 0.03) 87.5%),
+    linear-gradient(150deg, rgba(224, 30, 55, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(224, 30, 55, 0.03) 87.5%),
+    linear-gradient(270deg, rgba(0, 201, 219, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(0, 201, 219, 0.03) 87.5%);
+  background-size: 80px 140px;
   pointer-events: none;
   z-index: 0;
 }
 
+@keyframes bgPulse {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.85; transform: scale(1.05); }
+}
+
+/* Glass card base */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Vibrant gradient border */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #7b2ff7, #e01e37, #f77f00, #38b000, #00c9db);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Header gradient effect */
+.header-gradient {
+  background: linear-gradient(135deg, 
+    rgba(15, 15, 35, 0.95) 0%,
+    rgba(45, 20, 80, 0.9) 50%,
+    rgba(15, 15, 35, 0.95) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(123, 47, 247, 0.3);
+}
+
 /* Sticker card styles */
 .sticker-card {
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .sticker-card:active {
   transform: scale(0.93);
+}
+.sticker-card:hover {
+  transform: translateY(-2px);
 }
 
 /* Progress bar animation */
@@ -82,18 +148,97 @@ body {
 
 /* Page sections */
 .album-section {
-  animation: fadeSlideIn 0.3s ease-out;
+  animation: fadeSlideIn 0.4s ease-out;
 }
 
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Floating shapes decorative */
-.shape-circle {
-  border-radius: 50%;
+/* Colorful glow effects */
+.glow-purple { box-shadow: 0 0 30px rgba(123, 47, 247, 0.3), 0 0 60px rgba(123, 47, 247, 0.1); }
+.glow-red { box-shadow: 0 0 30px rgba(224, 30, 55, 0.3), 0 0 60px rgba(224, 30, 55, 0.1); }
+.glow-green { box-shadow: 0 0 30px rgba(56, 176, 0, 0.3), 0 0 60px rgba(56, 176, 0, 0.1); }
+.glow-teal { box-shadow: 0 0 30px rgba(0, 201, 219, 0.3), 0 0 60px rgba(0, 201, 219, 0.1); }
+.glow-gold { box-shadow: 0 0 30px rgba(255, 214, 10, 0.3), 0 0 60px rgba(255, 214, 10, 0.1); }
+
+/* Animated gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #ccff00, #00c9db, #7b2ff7, #e01e37);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 6s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Sidebar styles */
+.sidebar-glass {
+  background: rgba(15, 15, 35, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(123, 47, 247, 0.2);
+}
+
+/* Team card mesh pattern */
+.team-mesh::before {
+  content: "";
   position: absolute;
-  opacity: 0.15;
+  inset: 0;
+  opacity: 0.06;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 35px, rgba(255,255,255,0.4) 35px, rgba(255,255,255,0.4) 36px),
+    repeating-linear-gradient(90deg, transparent, transparent 35px, rgba(255,255,255,0.4) 35px, rgba(255,255,255,0.4) 36px);
   pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Floating orbs decorative */
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-20px) scale(1.1); }
+}
+
+/* Mobile nav glass */
+.mobile-nav-glass {
+  background: rgba(15, 15, 35, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(123, 47, 247, 0.2);
+}
+
+/* Shimmer effect for loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Neon border pulse */
+@keyframes neonPulse {
+  0%, 100% { border-color: rgba(123, 47, 247, 0.4); }
+  33% { border-color: rgba(224, 30, 55, 0.4); }
+  66% { border-color: rgba(0, 201, 219, 0.4); }
+}
+.neon-border {
+  animation: neonPulse 4s ease-in-out infinite;
 }
