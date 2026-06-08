@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import playersData from "@/data/players-enriched.json";
+import catalogData from "@/data/panini-wc-2026-catalog.json";
 
 interface PlayerDetailProps {
   stickerCode: string;
@@ -45,34 +46,44 @@ function getPositionColor(pos: string): string {
 }
 
 export function PlayerDetail({ stickerCode, image, onClose }: PlayerDetailProps) {
-  // Find player in enriched data by matching name from sticker catalog
-  const player = (playersData.players as PlayerInfo[]).find((p) => {
-    // Match by team code + trying to find by name/position order
-    const codeMatch = stickerCode.match(/^([A-Z]{2,3})(\d+)$/);
-    if (!codeMatch) return false;
-    const teamCode = codeMatch[1];
-    return p.team_code === teamCode && p.name.length > 0;
-  });
-
-  // Better matching: find by team code and sticker number order
+  // Match by name: find player in enriched data by comparing names
   const codeMatch = stickerCode.match(/^([A-Z]{2,3})(\d+)$/);
   const teamCode = codeMatch?.[1];
   const stickerNum = codeMatch ? parseInt(codeMatch[2]) : 0;
 
-  // Get all players from this team sorted by shirt number
+  // Get all players from this team
   const teamPlayers = teamCode
     ? (playersData.players as PlayerInfo[]).filter((p) => p.team_code === teamCode)
     : [];
 
-  // The sticker number doesn't always match shirt number, but we can try
-  // For now, find player whose name matches the panini catalog name
-  // Since we can't easily match here, just show the team player at this index position
-  const playerInfo = teamPlayers.length > 0 && stickerNum >= 2 && stickerNum <= teamPlayers.length + 1
-    ? teamPlayers[stickerNum - 2] // offset: sticker 1 = emblem, sticker 2 = first player
-    : null;
+  // Find by matching the sticker name (from catalog) against Wikipedia player names
+  // Use fuzzy matching: normalize and compare last names
+  function normalize(s: string): string {
+    return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+
+  // Get the sticker's display name from the catalog
+  const catalogEntry = catalogData.stickers.find((s: { code: string }) => s.code === stickerCode);
+  const stickerName = catalogEntry?.name || "";
+
+  let playerInfo: PlayerInfo | null = null;
+
+  if (stickerName && stickerName !== "Emblem" && stickerName !== "Team Photo") {
+    const normalizedStickerName = normalize(stickerName);
+    // Try exact match first
+    playerInfo = teamPlayers.find((p) => normalize(p.name) === normalizedStickerName) || null;
+    // Try last-name match
+    if (!playerInfo) {
+      const stickerParts = normalizedStickerName.split(" ");
+      playerInfo = teamPlayers.find((p) => {
+        const playerParts = normalize(p.name).split(" ");
+        return stickerParts.some((sp) => sp.length > 3 && playerParts.includes(sp));
+      }) || null;
+    }
+  }
 
   if (!playerInfo || !teamCode || stickerNum < 2) {
-    return null; // No data for emblems, team photos, or unmatched
+    return null;
   }
 
   return (

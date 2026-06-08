@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { Sticker } from "@/data/album";
 
 interface StickerCardProps {
@@ -22,6 +22,30 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
   const duplicate = quantity > 1;
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didLongPress = useRef(false);
+  const [wikiThumb, setWikiThumb] = useState<string | null>(null);
+
+  // Fetch Wikipedia thumbnail for owned players without a captured photo
+  useEffect(() => {
+    if (!owned || image || sticker.type !== "player") return;
+    if (sticker.name.length < 4) return;
+
+    const name = sticker.name.replace(/ /g, "_");
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.thumbnail?.source) {
+          setWikiThumb(data.thumbnail.source);
+        } else {
+          // Try with "(footballer)" suffix
+          return fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name + "_(footballer)")}`)
+            .then((r) => r.ok ? r.json() : null)
+            .then((d) => { if (d?.thumbnail?.source) setWikiThumb(d.thumbnail.source); });
+        }
+      })
+      .catch(() => {});
+  }, [owned, image, sticker.name, sticker.type]);
+
+  const displayImage = image || wikiThumb;
 
   const startPress = useCallback(() => {
     didLongPress.current = false;
@@ -72,10 +96,10 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
         onMouseUp={endPress}
         onMouseLeave={endPress}
       >
-        {owned && image ? (
+        {owned && displayImage ? (
           <div className="w-full h-full relative">
             <img
-              src={image}
+              src={displayImage}
               alt={sticker.name}
               className="w-full h-full object-cover"
             />
