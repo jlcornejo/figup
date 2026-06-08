@@ -9,17 +9,6 @@ export interface CollectionState {
 }
 
 const STORAGE_KEY = "figup-collection";
-const DEVICE_ID_KEY = "figup-device-id";
-
-function getOrCreateDeviceId(): string {
-  if (typeof window === "undefined") return "server";
-  let id = localStorage.getItem(DEVICE_ID_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(DEVICE_ID_KEY, id);
-  }
-  return id;
-}
 
 function loadFromLocalStorage(): CollectionState {
   if (typeof window === "undefined") return { stickers: {} };
@@ -40,24 +29,25 @@ function saveToLocalStorage(state: CollectionState) {
   }
 }
 
-export function useCollection() {
+export function useCollection(userId: string | null) {
   const [collection, setCollection] = useState<CollectionState>({ stickers: {} });
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const deviceId = useRef<string>("server");
+  const prevUserId = useRef<string | null>(null);
 
-  // Load collection on mount
+  // Load collection when userId changes
   useEffect(() => {
-    deviceId.current = getOrCreateDeviceId();
+    // Avoid reloading if same user
+    if (prevUserId.current === userId && isLoaded) return;
+    prevUserId.current = userId;
 
     async function load() {
-      if (isSupabaseConfigured && supabase) {
-        // Try to load from Supabase using device_id
+      if (userId && isSupabaseConfigured && supabase) {
         const { data, error } = await supabase
           .from("collections")
           .select("sticker_code, quantity")
-          .eq("device_id", deviceId.current);
+          .eq("user_id", userId);
 
         if (!error && data && data.length > 0) {
           const stickers: Record<string, number> = {};
@@ -65,8 +55,17 @@ export function useCollection() {
             stickers[row.sticker_code] = row.quantity;
           });
           setCollection({ stickers });
+        } else if (!error && data && data.length === 0) {
+          // New user — check if there's local data to migrate
+          const local = loadFromLocalStorage();
+          if (Object.keys(local.stickers).length > 0) {
+            setCollection(local);
+            // Migrate local data to cloud
+            syncToSupabase(userId, local);
+          } else {
+            setCollection({ stickers: {} });
+          }
         } else {
-          // Fallback to localStorage
           setCollection(loadFromLocalStorage());
         }
       } else {
@@ -75,30 +74,31 @@ export function useCollection() {
       setIsLoaded(true);
     }
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   // Save on every change
   useEffect(() => {
     if (!isLoaded) return;
     saveToLocalStorage(collection);
 
-    if (isSupabaseConfigured && supabase) {
+    if (userId && isSupabaseConfigured && supabase) {
       if (syncTimeout.current) clearTimeout(syncTimeout.current);
       syncTimeout.current = setTimeout(() => {
-        syncToSupabase(deviceId.current, collection);
+        syncToSupabase(userId, collection);
       }, 800);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collection, isLoaded]);
 
-  async function syncToSupabase(devId: string, state: CollectionState) {
+  async function syncToSupabase(uid: string, state: CollectionState) {
     if (!supabase) return;
     setIsSyncing(true);
     try {
       const upserts = Object.entries(state.stickers)
         .filter(([, qty]) => qty > 0)
         .map(([code, qty]) => ({
-          device_id: devId,
+          user_id: uid,
           sticker_code: code,
           quantity: qty,
         }));
@@ -106,14 +106,14 @@ export function useCollection() {
       if (upserts.length > 0) {
         await supabase
           .from("collections")
-          .upsert(upserts, { onConflict: "device_id,sticker_code" });
+          .upsert(upserts, { onConflict: "user_id,sticker_code" });
       }
 
       // Remove stickers deleted locally
       const { data: existing } = await supabase
         .from("collections")
         .select("sticker_code")
-        .eq("device_id", devId);
+        .eq("user_id", uid);
 
       if (existing) {
         const toDelete = existing
@@ -124,7 +124,7 @@ export function useCollection() {
           await supabase
             .from("collections")
             .delete()
-            .eq("device_id", devId)
+            .eq("user_id", uid)
             .in("sticker_code", toDelete);
         }
       }
