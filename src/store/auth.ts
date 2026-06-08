@@ -55,20 +55,22 @@ export function useAuth() {
 
   const signInWithGoogle = useCallback(async () => {
     if (!supabase) return;
+    const redirectTo = window.location.origin;
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin,
+        redirectTo,
       },
     });
   }, []);
 
   const signInWithEmail = useCallback(async (email: string) => {
     if (!supabase) return { error: null };
+    const redirectTo = window.location.origin;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: redirectTo,
       },
     });
     return { error };
