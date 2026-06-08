@@ -16,12 +16,12 @@
   --color-wc-gold-light: #ffd60a;
 
   /* App surfaces - dark with vibrancy */
-  --color-app-bg: #0f0f23;
-  --color-app-surface: rgba(255, 255, 255, 0.04);
-  --color-app-surface-hover: rgba(255, 255, 255, 0.08);
-  --color-app-border: rgba(255, 255, 255, 0.1);
+  --color-app-bg: #1a1145;
+  --color-app-surface: rgba(255, 255, 255, 0.06);
+  --color-app-surface-hover: rgba(255, 255, 255, 0.1);
+  --color-app-border: rgba(255, 255, 255, 0.12);
   --color-app-text: #f8f8ff;
-  --color-app-text-muted: #a0a0c0;
+  --color-app-text-muted: #b8b0d8;
 
   /* Sticker specific */
   --color-sticker-empty-bg: rgba(255, 255, 255, 0.06);
@@ -31,9 +31,9 @@
   --color-sticker-gold: #ffd60a;
 }
 
-/* Base body - deep dark with colorful accents */
+/* Base body */
 body {
-  background: #0f0f23;
+  background: #1a1145;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -50,44 +50,30 @@ body {
   border-radius: 3px;
 }
 
-/* Vibrant multicolor animated background */
+/* Background with WC 2026 image */
 .album-shapes-bg {
   position: relative;
+  background: #1a1145;
 }
 .album-shapes-bg::before {
   content: "";
   position: fixed;
   inset: 0;
-  background:
-    /* Large colorful blobs - WC 2026 style */
-    radial-gradient(ellipse 350px 350px at 0% 0%, rgba(123, 47, 247, 0.25) 0%, transparent 70%),
-    radial-gradient(ellipse 400px 400px at 100% 0%, rgba(224, 30, 55, 0.2) 0%, transparent 70%),
-    radial-gradient(ellipse 300px 300px at 100% 100%, rgba(56, 176, 0, 0.2) 0%, transparent 70%),
-    radial-gradient(ellipse 350px 350px at 0% 100%, rgba(0, 201, 219, 0.2) 0%, transparent 70%),
-    radial-gradient(ellipse 200px 200px at 50% 50%, rgba(247, 127, 0, 0.1) 0%, transparent 70%),
-    radial-gradient(ellipse 250px 250px at 30% 70%, rgba(255, 195, 0, 0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 200px 200px at 70% 30%, rgba(204, 255, 0, 0.08) 0%, transparent 70%);
+  background-image: url('/bg-mundial2026.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   pointer-events: none;
   z-index: 0;
-  animation: bgPulse 12s ease-in-out infinite alternate;
 }
+/* Dark overlay so content remains readable */
 .album-shapes-bg::after {
   content: "";
   position: fixed;
   inset: 0;
-  /* Geometric mesh overlay */
-  background-image:
-    linear-gradient(30deg, rgba(123, 47, 247, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(123, 47, 247, 0.03) 87.5%),
-    linear-gradient(150deg, rgba(224, 30, 55, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(224, 30, 55, 0.03) 87.5%),
-    linear-gradient(270deg, rgba(0, 201, 219, 0.03) 12%, transparent 12.5%, transparent 87%, rgba(0, 201, 219, 0.03) 87.5%);
-  background-size: 80px 140px;
+  background: rgba(15, 12, 40, 0.55);
   pointer-events: none;
   z-index: 0;
-}
-
-@keyframes bgPulse {
-  0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0.85; transform: scale(1.05); }
 }
 
 /* Glass card base */
@@ -121,9 +107,9 @@ body {
 /* Header gradient effect */
 .header-gradient {
   background: linear-gradient(135deg, 
-    rgba(15, 15, 35, 0.95) 0%,
-    rgba(45, 20, 80, 0.9) 50%,
-    rgba(15, 15, 35, 0.95) 100%
+    rgba(26, 17, 69, 0.92) 0%,
+    rgba(60, 20, 100, 0.88) 50%,
+    rgba(26, 17, 69, 0.92) 100%
   );
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -181,7 +167,7 @@ body {
 
 /* Sidebar styles */
 .sidebar-glass {
-  background: rgba(15, 15, 35, 0.92);
+  background: rgba(26, 17, 69, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid rgba(123, 47, 247, 0.2);
@@ -216,7 +202,7 @@ body {
 
 /* Mobile nav glass */
 .mobile-nav-glass {
-  background: rgba(15, 15, 35, 0.92);
+  background: rgba(26, 17, 69, 0.92);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid rgba(123, 47, 247, 0.2);
