@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface LoginScreenProps {
   onGoogleLogin: () => void;
-  onEmailLogin: (email: string) => Promise<{ error: unknown }>;
+  onEmailLogin: (email: string) => Promise<{ error: string | null }>;
 }
 
 export function LoginScreen({ onGoogleLogin, onEmailLogin }: LoginScreenProps) {
@@ -20,7 +20,7 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin }: LoginScreenProps) {
     setError(null);
     const { error: err } = await onEmailLogin(email.trim());
     if (err) {
-      setError("No se pudo enviar el email. Intentá de nuevo.");
+      setError(err);
     } else {
       setEmailSent(true);
     }

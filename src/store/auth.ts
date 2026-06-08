@@ -65,7 +65,7 @@ export function useAuth() {
   }, []);
 
   const signInWithEmail = useCallback(async (email: string) => {
-    if (!supabase) return { error: null };
+    if (!supabase) return { error: "Supabase no configurado" };
     const redirectTo = window.location.origin;
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -73,7 +73,7 @@ export function useAuth() {
         emailRedirectTo: redirectTo,
       },
     });
-    return { error };
+    return { error: error?.message || null };
   }, []);
 
   const signOut = useCallback(async () => {
