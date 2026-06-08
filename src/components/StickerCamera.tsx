@@ -71,7 +71,7 @@ export function StickerCamera({ stickerCode, onCapture, onClose }: StickerCamera
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.drawImage(video, 0, 0);
-    const dataUrl = canvas.toDataURL("image/png");
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
     setRawImage(dataUrl);
     setImageSize({ width: video.videoWidth, height: video.videoHeight });
     stopCamera();
@@ -94,26 +94,36 @@ export function StickerCamera({ stickerCode, onCapture, onClose }: StickerCamera
     reader.readAsDataURL(file);
   };
 
-  // Crop drag handlers (percentages)
-  const handlePointerDown = (e: React.PointerEvent, type: "move" | "resize") => {
+  // Crop drag handlers (percentages) - using touch and pointer events
+  const getEventPos = (e: React.TouchEvent | React.PointerEvent) => {
+    if ("touches" in e && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    if ("clientX" in e) {
+      return { x: e.clientX, y: e.clientY };
+    }
+    return { x: 0, y: 0 };
+  };
+
+  const handleDragStart = (e: React.TouchEvent | React.PointerEvent, type: "move" | "resize") => {
     e.preventDefault();
     e.stopPropagation();
     setDragging(type);
-    const rect = cropContainerRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    const pos = getEventPos(e);
     dragStart.current = {
-      x: e.clientX,
-      y: e.clientY,
+      x: pos.x,
+      y: pos.y,
       crop: { ...crop },
     };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
+  const handleDragMove = (e: React.TouchEvent | React.PointerEvent) => {
     if (!dragging || !cropContainerRef.current) return;
+    e.preventDefault();
     const rect = cropContainerRef.current.getBoundingClientRect();
-    const deltaX = ((e.clientX - dragStart.current.x) / rect.width) * 100;
-    const deltaY = ((e.clientY - dragStart.current.y) / rect.height) * 100;
+    const pos = getEventPos(e);
+    const deltaX = ((pos.x - dragStart.current.x) / rect.width) * 100;
+    const deltaY = ((pos.y - dragStart.current.y) / rect.height) * 100;
     const prev = dragStart.current.crop;
 
     if (dragging === "move") {
@@ -127,7 +137,7 @@ export function StickerCamera({ stickerCode, onCapture, onClose }: StickerCamera
     }
   };
 
-  const handlePointerUp = () => {
+  const handleDragEnd = () => {
     setDragging(null);
   };
 
@@ -142,13 +152,16 @@ export function StickerCamera({ stickerCode, onCapture, onClose }: StickerCamera
       const sh = (crop.height / 100) * img.naturalHeight;
 
       const canvas = document.createElement("canvas");
-      canvas.width = sw;
-      canvas.height = sh;
+      // Limit output size for performance on mobile
+      const maxDim = 600;
+      const scale = Math.min(1, maxDim / Math.max(sw, sh));
+      canvas.width = sw * scale;
+      canvas.height = sh * scale;
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
       }
-      setCroppedImage(canvas.toDataURL("image/png"));
+      setCroppedImage(canvas.toDataURL("image/jpeg", 0.85));
     };
     img.src = rawImage;
   };
@@ -160,109 +173,129 @@ export function StickerCamera({ stickerCode, onCapture, onClose }: StickerCamera
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
-      <div className="bg-[#1e1b3a] rounded-2xl overflow-hidden max-w-lg w-full shadow-2xl border border-white/10">
+    <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-[#1e1b3a] rounded-2xl overflow-hidden w-full max-w-lg max-h-[95vh] flex flex-col shadow-2xl border border-white/10">
         {/* Header */}
-        <div className="px-4 py-3 flex items-center justify-between border-b border-white/10">
+        <div className="px-4 py-3 flex items-center justify-between border-b border-white/10 shrink-0">
           <div>
             <h3 className="text-sm font-bold text-white">📸 Capturar figurita</h3>
             <p className="text-[11px] text-white/50">{stickerCode}</p>
           </div>
-          <button onClick={onClose} className="text-white/50 hover:text-white text-xl leading-none">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 text-lg leading-none">
             ✕
           </button>
         </div>
 
-        {/* Content */}
-        <div className="relative bg-black">
-          {error && !rawImage ? (
-            <div className="aspect-[4/3] flex flex-col items-center justify-center gap-3 p-6">
-              <p className="text-white/60 text-sm text-center">{error}</p>
-              <label className="cursor-pointer bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-                📁 Subir imagen
-                <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-              </label>
-            </div>
-          ) : croppedImage ? (
-            /* Show cropped result */
-            <div className="aspect-[3/4] max-h-[50vh] flex items-center justify-center bg-gray-900 p-2">
-              <img src={croppedImage} alt="Cropped sticker" className="max-w-full max-h-full object-contain rounded" />
-            </div>
-          ) : rawImage ? (
-            /* Crop mode */
-            <div
-              ref={cropContainerRef}
-              className="relative aspect-[4/3] max-h-[50vh] overflow-hidden touch-none"
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-            >
-              <img src={rawImage} alt="Raw capture" className="w-full h-full object-contain" />
-              {/* Darkened overlay outside crop area */}
-              <div className="absolute inset-0 pointer-events-none">
-                {/* Top */}
-                <div className="absolute top-0 left-0 right-0 bg-black/60" style={{ height: `${crop.y}%` }} />
-                {/* Bottom */}
-                <div className="absolute bottom-0 left-0 right-0 bg-black/60" style={{ height: `${100 - crop.y - crop.height}%` }} />
-                {/* Left */}
-                <div className="absolute bg-black/60" style={{ top: `${crop.y}%`, left: 0, width: `${crop.x}%`, height: `${crop.height}%` }} />
-                {/* Right */}
-                <div className="absolute bg-black/60" style={{ top: `${crop.y}%`, right: 0, width: `${100 - crop.x - crop.width}%`, height: `${crop.height}%` }} />
+        {/* Content - scrollable on small screens */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="relative bg-black">
+            {error && !rawImage ? (
+              <div className="aspect-[4/3] flex flex-col items-center justify-center gap-3 p-6">
+                <p className="text-white/60 text-sm text-center">{error}</p>
+                <label className="cursor-pointer bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors active:scale-95">
+                  📁 Subir imagen
+                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
+                </label>
               </div>
-              {/* Crop box (draggable) */}
+            ) : croppedImage ? (
+              /* Show cropped result */
+              <div className="flex items-center justify-center bg-gray-900 p-3" style={{ minHeight: "200px", maxHeight: "55vh" }}>
+                <img src={croppedImage} alt="Cropped sticker" className="max-w-full max-h-[50vh] object-contain rounded-lg" />
+              </div>
+            ) : rawImage ? (
+              /* Crop mode */
               <div
-                className="absolute border-2 border-white cursor-move"
-                style={{
-                  left: `${crop.x}%`,
-                  top: `${crop.y}%`,
-                  width: `${crop.width}%`,
-                  height: `${crop.height}%`,
-                }}
-                onPointerDown={(e) => handlePointerDown(e, "move")}
+                ref={cropContainerRef}
+                className="relative overflow-hidden select-none"
+                style={{ maxHeight: "55vh" }}
+                onPointerMove={handleDragMove}
+                onPointerUp={handleDragEnd}
+                onPointerCancel={handleDragEnd}
+                onTouchMove={handleDragMove}
+                onTouchEnd={handleDragEnd}
+                onTouchCancel={handleDragEnd}
               >
-                {/* Corner guides */}
-                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-white" />
-                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-white" />
-                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-white" />
-                {/* Resize handle (bottom-right) */}
-                <div
-                  className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-tl-md cursor-se-resize"
-                  onPointerDown={(e) => handlePointerDown(e, "resize")}
+                <img
+                  src={rawImage}
+                  alt="Raw capture"
+                  className="w-full h-auto object-contain"
+                  style={{ maxHeight: "55vh" }}
+                  draggable={false}
                 />
+                {/* Darkened overlay outside crop area */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Top */}
+                  <div className="absolute top-0 left-0 right-0 bg-black/60" style={{ height: `${crop.y}%` }} />
+                  {/* Bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60" style={{ height: `${100 - crop.y - crop.height}%` }} />
+                  {/* Left */}
+                  <div className="absolute bg-black/60" style={{ top: `${crop.y}%`, left: 0, width: `${crop.x}%`, height: `${crop.height}%` }} />
+                  {/* Right */}
+                  <div className="absolute bg-black/60" style={{ top: `${crop.y}%`, right: 0, width: `${100 - crop.x - crop.width}%`, height: `${crop.height}%` }} />
+                </div>
+                {/* Crop box (draggable) */}
+                <div
+                  className="absolute border-2 border-white/90 rounded-sm"
+                  style={{
+                    left: `${crop.x}%`,
+                    top: `${crop.y}%`,
+                    width: `${crop.width}%`,
+                    height: `${crop.height}%`,
+                    touchAction: "none",
+                  }}
+                  onPointerDown={(e) => handleDragStart(e, "move")}
+                  onTouchStart={(e) => handleDragStart(e, "move")}
+                >
+                  {/* Corner guides */}
+                  <div className="absolute -top-0.5 -left-0.5 w-5 h-5 border-t-3 border-l-3 border-white rounded-tl-sm" />
+                  <div className="absolute -top-0.5 -right-0.5 w-5 h-5 border-t-3 border-r-3 border-white rounded-tr-sm" />
+                  <div className="absolute -bottom-0.5 -left-0.5 w-5 h-5 border-b-3 border-l-3 border-white rounded-bl-sm" />
+                  {/* Resize handle (bottom-right) — larger touch target */}
+                  <div
+                    className="absolute -bottom-2 -right-2 w-8 h-8 flex items-center justify-center"
+                    style={{ touchAction: "none" }}
+                    onPointerDown={(e) => handleDragStart(e, "resize")}
+                    onTouchStart={(e) => handleDragStart(e, "resize")}
+                  >
+                    <div className="w-4 h-4 bg-white rounded-sm shadow-md" />
+                  </div>
+                </div>
+                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-white/70 pointer-events-none">
+                  Arrastrá el recuadro para ajustar
+                </p>
               </div>
-              <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-white/70 pointer-events-none">
-                Arrastrá el recuadro para ajustar el recorte
-              </p>
-            </div>
-          ) : (
-            /* Camera preview */
-            <>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full aspect-[4/3] object-cover"
-              />
-              <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-white/60">
-                Centrá la figurita y capturá
-              </p>
-            </>
-          )}
+            ) : (
+              /* Camera preview */
+              <div className="relative">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full object-cover"
+                  style={{ maxHeight: "55vh" }}
+                />
+                <p className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-white/60">
+                  Centrá la figurita y capturá
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="px-4 py-3 flex gap-2 border-t border-white/10">
+        {/* Actions - always visible at bottom */}
+        <div className="px-4 py-3 flex gap-2 border-t border-white/10 shrink-0 bg-[#1e1b3a]">
           {croppedImage ? (
             <>
               <button
                 onClick={() => setCroppedImage(null)}
-                className="flex-1 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/15 transition-colors"
+                className="flex-1 py-3 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/15 active:scale-95 transition-all"
               >
-                ← Ajustar recorte
+                ← Ajustar
               </button>
               <button
                 onClick={handleConfirm}
-                className="flex-1 py-2.5 rounded-lg text-sm font-bold bg-sticker-green text-white hover:bg-sticker-green/80 transition-colors"
+                className="flex-1 py-3 rounded-xl text-sm font-bold bg-sticker-green text-white hover:bg-sticker-green/80 active:scale-95 transition-all"
               >
                 ✓ Guardar
               </button>
@@ -273,7 +306,6 @@ export function StickerCamera({ stickerCode, onCapture, onClose }: StickerCamera
                 onClick={() => {
                   setRawImage(null);
                   setCrop({ x: 15, y: 10, width: 70, height: 80 });
-                  // Restart camera
                   navigator.mediaDevices
                     .getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 960 } } })
                     .then((mediaStream) => {
@@ -284,27 +316,27 @@ export function StickerCamera({ stickerCode, onCapture, onClose }: StickerCamera
                       }
                     });
                 }}
-                className="flex-1 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/15 transition-colors"
+                className="flex-1 py-3 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/15 active:scale-95 transition-all"
               >
                 🔄 Otra foto
               </button>
               <button
                 onClick={applyCrop}
-                className="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-black hover:bg-white/90 transition-colors"
+                className="flex-1 py-3 rounded-xl text-sm font-bold bg-white text-black hover:bg-white/90 active:scale-95 transition-all"
               >
                 ✂️ Recortar
               </button>
             </>
           ) : (
             <>
-              <label className="flex-1 py-2.5 rounded-lg text-sm font-medium bg-white/10 text-white hover:bg-white/15 transition-colors text-center cursor-pointer">
+              <label className="flex-1 py-3 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/15 active:scale-95 transition-all text-center cursor-pointer">
                 📁 Galería
-                <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
               </label>
               <button
                 onClick={takePhoto}
                 disabled={!!error}
-                className="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white text-black hover:bg-white/90 transition-colors disabled:opacity-40"
+                className="flex-1 py-3 rounded-xl text-sm font-bold bg-white text-black hover:bg-white/90 active:scale-95 transition-all disabled:opacity-40"
               >
                 📷 Capturar
               </button>
