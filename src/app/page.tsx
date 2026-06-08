@@ -35,6 +35,7 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cameraTarget, setCameraTarget] = useState<string | null>(null);
   const [zoomTarget, setZoomTarget] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { getImage, setImage, removeImage } = useStickerImages();
 
@@ -66,7 +67,20 @@ export default function Home() {
   );
 
   const visibleTeams = useMemo(() => {
-    const allTeams = albumData.sections.teams;
+    let allTeams = albumData.sections.teams;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      allTeams = allTeams.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          t.code.toLowerCase().includes(q) ||
+          t.group.toLowerCase() === q ||
+          `grupo ${t.group}`.toLowerCase().includes(q)
+      );
+      return allTeams;
+    }
 
     if (currentSection === "all") return allTeams;
     if (currentSection.startsWith("group-")) {
@@ -75,18 +89,19 @@ export default function Home() {
     }
     const team = allTeams.find((t) => t.id === currentSection);
     return team ? [team] : [];
-  }, [currentSection]);
+  }, [currentSection, searchQuery]);
 
   const showOpening =
-    currentSection === "all" || currentSection === "opening";
+    !searchQuery && (currentSection === "all" || currentSection === "opening");
   const showTeams =
+    searchQuery ||
     currentSection === "all" ||
     currentSection.startsWith("group-") ||
     albumData.sections.teams.some((t) => t.id === currentSection);
   const showFwcBottom =
-    currentSection === "all" || currentSection === "fwc-bottom";
+    !searchQuery && (currentSection === "all" || currentSection === "fwc-bottom");
   const showCocaCola =
-    currentSection === "all" || currentSection === "coca-cola";
+    !searchQuery && (currentSection === "all" || currentSection === "coca-cola");
 
   // Auth loading
   if (authLoading) {
@@ -162,6 +177,29 @@ export default function Home() {
 
         {/* Main content */}
         <main className="flex-1 p-4 lg:p-6 pb-20 lg:pb-6 max-w-6xl overflow-y-auto">
+          {/* Search */}
+          <div className="mb-3">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm">🔍</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar equipo... (ej: Uruguay, ARG, Grupo D)"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-9 py-2.5 text-sm
+                  text-white placeholder:text-white/30 focus:outline-none focus:border-wc-teal/50 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white text-sm"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Instructions */}
           <div className="mb-4 bg-white/5 border border-white/10 rounded-xl p-3 backdrop-blur-sm">
             <p className="text-xs text-white/60">
