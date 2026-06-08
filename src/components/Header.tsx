@@ -19,17 +19,11 @@ export function Header({ totalOwned, totalStickers, totalDuplicates, userSlot }:
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="relative w-12 h-12">
-              <div className="absolute inset-0 rounded-2xl overflow-hidden bg-black/30 border border-white/10">
-                <div className="absolute top-0 left-0 w-7 h-7 rounded-full bg-wc-red" />
-                <div className="absolute top-0 right-0 w-5 h-5 rounded-full bg-wc-green" />
-                <div className="absolute bottom-0 left-0 w-5 h-5 rounded-full bg-wc-teal" />
-                <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-wc-orange" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white text-base font-black drop-shadow-lg">26</span>
-                </div>
-              </div>
-              {/* Rainbow ring */}
-              <div className="absolute inset-0 rounded-2xl gradient-border" />
+              <img
+                src="/icon-192.png"
+                alt="FigUp"
+                className="w-full h-full rounded-2xl object-cover"
+              />
             </div>
             <div>
               <h1 className="text-2xl font-black leading-tight tracking-tight">

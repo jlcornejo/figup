@@ -33,16 +33,11 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin }: LoginScreenProps) {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="relative w-24 h-24 mx-auto mb-5">
-            <div className="absolute inset-0 rounded-3xl overflow-hidden bg-black/30 border border-white/10">
-              <div className="absolute top-0 left-0 w-14 h-14 rounded-full bg-wc-red" />
-              <div className="absolute top-0 right-0 w-10 h-10 rounded-full bg-wc-green" />
-              <div className="absolute bottom-0 left-0 w-10 h-10 rounded-full bg-wc-teal" />
-              <div className="absolute bottom-0 right-0 w-14 h-14 rounded-full bg-wc-orange" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-white text-3xl font-black drop-shadow-lg">26</span>
-              </div>
-            </div>
-            <div className="absolute inset-0 rounded-3xl gradient-border" />
+            <img
+              src="/icon-512.png"
+              alt="FigUp"
+              className="w-full h-full rounded-3xl object-cover"
+            />
           </div>
           <h1 className="text-4xl font-black">
             <span className="gradient-text">Fig</span><span className="text-white">Up</span>

@@ -7,8 +7,8 @@ export const metadata: Metadata = {
     "Controlá tu colección de figuritas del álbum Panini FIFA World Cup 2026. Marcá las que tenés, las repetidas, y completá tu álbum.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
   },
 };
 

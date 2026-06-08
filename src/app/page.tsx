@@ -17,6 +17,7 @@ import { MobileNav } from "@/components/MobileNav";
 import { LoginScreen } from "@/components/LoginScreen";
 import { UserMenu } from "@/components/UserMenu";
 import { PlayerDetail } from "@/components/PlayerDetail";
+import { SplashScreen } from "@/components/SplashScreen";
 
 export default function Home() {
   const { user, profile, isLoading: authLoading, isAuthenticated, signInWithGoogle, signInWithEmail, signOut } = useAuth();
@@ -139,24 +140,7 @@ export default function Home() {
 
   // Auth loading
   if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-2xl overflow-hidden animate-pulse">
-              <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-wc-red opacity-80" />
-              <div className="absolute top-0 right-0 w-7 h-7 rounded-full bg-wc-green opacity-80" />
-              <div className="absolute bottom-0 left-0 w-7 h-7 rounded-full bg-wc-skyblue opacity-80" />
-              <div className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-wc-orange opacity-80" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-white text-xl font-black drop-shadow-md">26</span>
-              </div>
-            </div>
-          </div>
-          <p className="text-sm text-app-text-muted">Cargando...</p>
-        </div>
-      </div>
-    );
+    return <SplashScreen message="Cargando..." />;
   }
 
   // Not authenticated — show login
@@ -166,24 +150,7 @@ export default function Home() {
 
   // Collection loading
   if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-2xl overflow-hidden animate-pulse">
-              <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-wc-red opacity-80" />
-              <div className="absolute top-0 right-0 w-7 h-7 rounded-full bg-wc-green opacity-80" />
-              <div className="absolute bottom-0 left-0 w-7 h-7 rounded-full bg-wc-skyblue opacity-80" />
-              <div className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-wc-orange opacity-80" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-white text-xl font-black drop-shadow-md">26</span>
-              </div>
-            </div>
-          </div>
-          <p className="text-sm text-app-text-muted">Cargando tu álbum...</p>
-        </div>
-      </div>
-    );
+    return <SplashScreen message="Cargando tu álbum..." />;
   }
 
   return (
