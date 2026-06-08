@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import playersData from "@/data/players-enriched.json";
 
 interface PlayerDetailProps {
@@ -75,6 +76,30 @@ export function PlayerDetail({ stickerCode, image, onClose }: PlayerDetailProps)
   }
 
   return (
+    <PlayerDetailModal playerInfo={playerInfo} stickerCode={stickerCode} image={image} onClose={onClose} />
+  );
+}
+
+function PlayerDetailModal({ playerInfo, stickerCode, image, onClose }: { playerInfo: PlayerInfo; stickerCode: string; image?: string | null; onClose: () => void }) {
+  const [wikiImage, setWikiImage] = useState<string | null>(null);
+
+  // Fetch Wikipedia image as fallback
+  useEffect(() => {
+    if (image) return; // Already have a captured image
+    const playerName = playerInfo.name.replace(/ /g, "_");
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(playerName)}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.thumbnail?.source) {
+          setWikiImage(data.thumbnail.source);
+        }
+      })
+      .catch(() => {}); // Silent fail
+  }, [playerInfo.name, image]);
+
+  const displayImage = image || wikiImage;
+
+  return (
     <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" onClick={onClose}>
       <div
         className="bg-[#1a1744] border border-white/10 rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden"
@@ -85,9 +110,9 @@ export function PlayerDetail({ stickerCode, image, onClose }: PlayerDetailProps)
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Player image */}
-              {image && (
+              {displayImage && (
                 <div className="w-16 h-20 rounded-lg overflow-hidden border-2 border-white/20 shrink-0">
-                  <img src={image} alt={playerInfo.name} className="w-full h-full object-cover" />
+                  <img src={displayImage} alt={playerInfo.name} className="w-full h-full object-cover" />
                 </div>
               )}
               <div>
