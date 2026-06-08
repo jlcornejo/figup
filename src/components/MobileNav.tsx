@@ -1,6 +1,6 @@
 "use client";
 
-import { ViewFilter, SectionView } from "./Sidebar";
+import { ViewFilter } from "./Sidebar";
 
 interface MobileNavProps {
   filter: ViewFilter;
@@ -23,13 +23,11 @@ export function MobileNav({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
-      {/* Stats bar */}
-      <div className="bg-app-bg/90 backdrop-blur-md border-t border-white/10 px-3 py-2">
-        {/* Filters row */}
+      <div className="mobile-nav-glass px-3 py-2.5">
         <div className="flex items-center gap-1.5">
           <button
             onClick={onMenuOpen}
-            className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-sm shrink-0"
+            className="w-9 h-9 rounded-xl bg-gradient-to-br from-wc-purple/30 to-wc-blue/20 flex items-center justify-center text-sm shrink-0 border border-wc-purple/30"
           >
             ☰
           </button>
@@ -45,10 +43,10 @@ export function MobileNav({
             <button
               key={f.key}
               onClick={() => onFilterChange(f.key)}
-              className={`flex-1 py-1.5 rounded-lg text-[10px] font-medium transition-all ${
+              className={`flex-1 py-2 rounded-xl text-[10px] font-semibold transition-all ${
                 filter === f.key
-                  ? "bg-wc-lime/20 text-wc-lime border border-wc-lime/30"
-                  : "bg-white/5 text-white/50 border border-transparent"
+                  ? "bg-gradient-to-r from-wc-purple to-wc-blue text-white shadow-lg shadow-wc-purple/20"
+                  : "bg-white/5 text-white/40 border border-white/5"
               }`}
             >
               {f.icon}
@@ -58,10 +56,10 @@ export function MobileNav({
 
           {/* Mini stats */}
           <div className="shrink-0 text-right pl-2 border-l border-white/10">
-            <div className="text-[10px] font-bold text-wc-lime leading-none">
+            <div className="text-[10px] font-bold gradient-text leading-none">
               {totalOwned}/{totalStickers}
             </div>
-            <div className="text-[9px] text-white/40 leading-none mt-0.5">
+            <div className="text-[9px] text-white/35 leading-none mt-0.5">
               {percentage}%{totalDuplicates > 0 && ` · ${totalDuplicates}🔄`}
             </div>
           </div>

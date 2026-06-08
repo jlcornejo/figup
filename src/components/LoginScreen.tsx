@@ -32,93 +32,100 @@ export function LoginScreen({ onGoogleLogin, onEmailLogin }: LoginScreenProps) {
       <div className="relative z-10 max-w-sm w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="relative w-20 h-20 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-2xl overflow-hidden">
-              <div className="absolute top-0 left-0 w-11 h-11 rounded-full bg-wc-red opacity-80" />
-              <div className="absolute top-0 right-0 w-9 h-9 rounded-full bg-wc-green opacity-80" />
-              <div className="absolute bottom-0 left-0 w-9 h-9 rounded-full bg-wc-skyblue opacity-80" />
-              <div className="absolute bottom-0 right-0 w-11 h-11 rounded-full bg-wc-orange opacity-80" />
+          <div className="relative w-24 h-24 mx-auto mb-5">
+            <div className="absolute inset-0 rounded-3xl overflow-hidden bg-black/30 border border-white/10">
+              <div className="absolute top-0 left-0 w-14 h-14 rounded-full bg-wc-red" />
+              <div className="absolute top-0 right-0 w-10 h-10 rounded-full bg-wc-green" />
+              <div className="absolute bottom-0 left-0 w-10 h-10 rounded-full bg-wc-teal" />
+              <div className="absolute bottom-0 right-0 w-14 h-14 rounded-full bg-wc-orange" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-white text-2xl font-black drop-shadow-md">26</span>
+                <span className="text-white text-3xl font-black drop-shadow-lg">26</span>
               </div>
             </div>
+            <div className="absolute inset-0 rounded-3xl gradient-border" />
           </div>
-          <h1 className="text-3xl font-black">
-            <span className="text-wc-lime">Fig</span><span className="text-white">Up</span>
+          <h1 className="text-4xl font-black">
+            <span className="gradient-text">Fig</span><span className="text-white">Up</span>
           </h1>
-          <p className="text-sm text-white/50 mt-1">Tu álbum del Mundial 2026</p>
+          <p className="text-sm text-white/40 mt-2 tracking-wide">Tu álbum del Mundial 2026</p>
         </div>
 
         {/* Login card */}
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
-          {emailSent ? (
-            <div className="text-center py-4">
-              <span className="text-4xl mb-3 block">✉️</span>
-              <h3 className="text-lg font-bold text-white mb-2">Revisá tu email</h3>
-              <p className="text-sm text-white/60">
-                Te enviamos un link mágico a <strong className="text-white">{email}</strong>. 
-                Hacé click en el link para ingresar.
-              </p>
-              <button
-                onClick={() => setEmailSent(false)}
-                className="mt-4 text-xs text-white/40 hover:text-white/70 underline"
-              >
-                Usar otro email
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Google login */}
-              <button
-                onClick={onGoogleLogin}
-                className="w-full flex items-center justify-center gap-3 bg-white text-gray-800 font-medium 
-                  py-3 px-4 rounded-xl hover:bg-gray-100 transition-colors text-sm"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Continuar con Google
-              </button>
-
-              {/* Divider */}
-              <div className="flex items-center gap-3 my-5">
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-[10px] text-white/30 uppercase tracking-wider">o</span>
-                <div className="flex-1 h-px bg-white/10" />
-              </div>
-
-              {/* Email magic link */}
-              <form onSubmit={handleEmailSubmit}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@email.com"
-                  required
-                  className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 text-sm
-                    text-white placeholder:text-white/30 focus:outline-none focus:border-wc-teal mb-3"
-                />
+        <div className="glass-card rounded-3xl p-6 gradient-border">
+          <div className="relative z-10">
+            {emailSent ? (
+              <div className="text-center py-4">
+                <span className="text-4xl mb-3 block">✉️</span>
+                <h3 className="text-lg font-bold text-white mb-2">Revisá tu email</h3>
+                <p className="text-sm text-white/50">
+                  Te enviamos un link mágico a <strong className="text-white">{email}</strong>. 
+                  Hacé click en el link para ingresar.
+                </p>
                 <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-wc-teal to-wc-green
-                    text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                  onClick={() => setEmailSent(false)}
+                  className="mt-4 text-xs text-white/40 hover:text-white/70 underline"
                 >
-                  {isLoading ? "Enviando..." : "Enviar link mágico"}
+                  Usar otro email
                 </button>
-              </form>
+              </div>
+            ) : (
+              <>
+                {/* Google login */}
+                <button
+                  onClick={onGoogleLogin}
+                  className="w-full flex items-center justify-center gap-3 bg-white text-gray-800 font-semibold 
+                    py-3.5 px-4 rounded-2xl hover:bg-gray-50 transition-all text-sm shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continuar con Google
+                </button>
 
-              {error && (
-                <p className="mt-3 text-xs text-wc-red text-center">{error}</p>
-              )}
-            </>
-          )}
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-5">
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                  <span className="text-[10px] text-white/25 uppercase tracking-widest">o</span>
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                </div>
+
+                {/* Email magic link */}
+                <form onSubmit={handleEmailSubmit}>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tu@email.com"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 text-sm
+                      text-white placeholder:text-white/25 focus:outline-none focus:border-wc-purple/50 
+                      focus:shadow-lg focus:shadow-wc-purple/10 transition-all"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full mt-3 py-3.5 rounded-2xl text-sm font-bold 
+                      bg-gradient-to-r from-wc-purple via-wc-red to-wc-orange
+                      text-white hover:opacity-90 transition-all disabled:opacity-50
+                      shadow-lg shadow-wc-purple/20 hover:shadow-xl hover:shadow-wc-purple/30
+                      hover:scale-[1.02]"
+                  >
+                    {isLoading ? "Enviando..." : "Enviar link mágico ✨"}
+                  </button>
+                </form>
+
+                {error && (
+                  <p className="mt-3 text-xs text-wc-red text-center">{error}</p>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
-        <p className="text-[10px] text-white/30 text-center mt-4">
+        <p className="text-[10px] text-white/25 text-center mt-5">
           Al ingresar, tus figuritas se guardan en la nube y podés acceder desde cualquier dispositivo.
         </p>
       </div>

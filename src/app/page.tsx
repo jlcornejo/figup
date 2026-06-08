@@ -183,19 +183,20 @@ export default function Home() {
           {/* Search */}
           <div className="mb-3">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm">🔍</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 text-sm">🔍</span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar equipo o jugador... (ej: Messi, Uruguay, ARG)"
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-9 py-2.5 text-sm
-                  text-white placeholder:text-white/30 focus:outline-none focus:border-wc-teal/50 transition-colors"
+                className="w-full glass-card rounded-2xl pl-10 pr-10 py-3 text-sm
+                  text-white placeholder:text-white/25 focus:outline-none focus:border-wc-purple/40 
+                  focus:shadow-lg focus:shadow-wc-purple/10 transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white text-sm"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white text-sm transition-colors"
                 >
                   ✕
                 </button>
@@ -204,12 +205,12 @@ export default function Home() {
           </div>
 
           {/* Instructions */}
-          <div className="mb-4 bg-white/5 border border-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <p className="text-xs text-white/60">
-              <strong className="text-white">Tap/Click</strong> para agregar · 
-              <strong className="text-white"> Mantener presionado</strong> para quitar · 
-              <strong className="text-wc-gold-light"> Dorado</strong> = repetida · 
-              <strong className="text-sticker-green"> Verde</strong> = tengo
+          <div className="mb-4 glass-card rounded-2xl p-3.5">
+            <p className="text-xs text-white/50">
+              <strong className="text-white/80">Tap/Click</strong> para agregar · 
+              <strong className="text-white/80"> Mantener presionado</strong> para quitar · 
+              <span className="text-wc-gold-light font-bold"> Dorado</span> = repetida · 
+              <span className="text-sticker-green font-bold"> Verde</span> = tengo
             </p>
           </div>
 

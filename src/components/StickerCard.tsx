@@ -48,26 +48,18 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
 
   return (
     <div className="sticker-card relative select-none group">
-      {/* Main sticker area — click to add */}
+      {/* Main sticker area */}
       <div
         className={`
-          rounded-lg aspect-[3/4] flex flex-col items-center justify-center text-center overflow-hidden
-          border-2 transition-all cursor-pointer
+          rounded-xl aspect-[3/4] flex flex-col items-center justify-center text-center overflow-hidden
+          border transition-all cursor-pointer
           ${owned
             ? duplicate
-              ? "bg-white border-sticker-gold shadow-md shadow-yellow-400/20"
-              : "bg-white border-sticker-green shadow-md shadow-green-400/20"
-            : "border-dashed"
+              ? "bg-white border-sticker-gold/80 shadow-lg shadow-yellow-400/15"
+              : "bg-white border-sticker-green/60 shadow-lg shadow-green-400/15"
+            : "border-dashed border-white/15 hover:border-white/30 bg-white/[0.04] hover:bg-white/[0.08]"
           }
         `}
-        style={
-          !owned
-            ? {
-                backgroundColor: "rgba(255,255,255,0.08)",
-                borderColor: "rgba(255,255,255,0.3)",
-              }
-            : undefined
-        }
         onClick={handleClick}
         onContextMenu={(e) => {
           e.preventDefault();
@@ -81,22 +73,20 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
         onMouseLeave={endPress}
       >
         {owned && image ? (
-          /* Has captured image */
           <div className="w-full h-full relative">
             <img
               src={image}
               alt={sticker.name}
               className="w-full h-full object-cover"
             />
-            <span className="absolute bottom-0 left-0 right-0 text-[7px] font-bold text-center py-0.5 bg-black/50 text-white">
+            <span className="absolute bottom-0 left-0 right-0 text-[7px] font-bold text-center py-0.5 bg-black/60 text-white backdrop-blur-sm">
               {sticker.name}
             </span>
           </div>
         ) : owned ? (
-          /* Owned but no image */
           <>
             <div
-              className="w-full flex-1 rounded flex items-center justify-center"
+              className="w-full flex-1 rounded-lg flex items-center justify-center"
               style={{ backgroundColor: `${teamColor || "#4a69bd"}15` }}
             >
               <span className="text-base">
@@ -115,13 +105,12 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
             </span>
           </>
         ) : (
-          /* Empty slot - show code + player name */
           <div className="flex flex-col items-center justify-center h-full px-0.5">
-            <span className="text-[10px] font-bold text-white/50">
+            <span className="text-[10px] font-bold text-white/40">
               {sticker.code}
             </span>
             {sticker.name !== "Emblem" && sticker.name !== "Team Photo" && (
-              <span className="text-[7px] text-white/35 leading-tight text-center mt-0.5 line-clamp-2">
+              <span className="text-[7px] text-white/25 leading-tight text-center mt-0.5 line-clamp-2">
                 {sticker.name}
               </span>
             )}
@@ -129,28 +118,25 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
         )}
       </div>
 
-      {/* Action buttons (visible on hover / always on mobile for owned) */}
+      {/* Action buttons */}
       {owned && (
         <div className="absolute -bottom-1 left-0 right-0 flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          {/* Minus button */}
           <button
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
-            className="w-5 h-5 rounded-full bg-red-500/80 text-white text-[10px] font-bold flex items-center justify-center hover:bg-red-500 shadow-sm"
+            className="w-5 h-5 rounded-full bg-wc-red/90 text-white text-[10px] font-bold flex items-center justify-center hover:bg-wc-red shadow-sm"
             title="Quitar"
           >
             −
           </button>
-          {/* Info button */}
           {onInfoClick && sticker.type === "player" && (
             <button
               onClick={(e) => { e.stopPropagation(); onInfoClick(); }}
-              className="w-5 h-5 rounded-full bg-purple-500/80 text-white text-[9px] flex items-center justify-center hover:bg-purple-500 shadow-sm"
+              className="w-5 h-5 rounded-full bg-wc-purple/90 text-white text-[9px] flex items-center justify-center hover:bg-wc-purple shadow-sm"
               title="Info del jugador"
             >
               ℹ
             </button>
           )}
-          {/* Zoom/view image */}
           {image && onImageClick && (
             <button
               onClick={(e) => { e.stopPropagation(); onImageClick(); }}
@@ -160,20 +146,18 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
               🔍
             </button>
           )}
-          {/* Camera */}
           {onCameraClick && (
             <button
               onClick={(e) => { e.stopPropagation(); onCameraClick(); }}
-              className="w-5 h-5 rounded-full bg-blue-500/80 text-white text-[9px] flex items-center justify-center hover:bg-blue-500 shadow-sm"
+              className="w-5 h-5 rounded-full bg-wc-teal/90 text-white text-[9px] flex items-center justify-center hover:bg-wc-teal shadow-sm"
               title="Capturar foto"
             >
               📷
             </button>
           )}
-          {/* Plus button */}
           <button
             onClick={(e) => { e.stopPropagation(); onAdd(); }}
-            className="w-5 h-5 rounded-full bg-sticker-green/80 text-white text-[10px] font-bold flex items-center justify-center hover:bg-sticker-green shadow-sm"
+            className="w-5 h-5 rounded-full bg-wc-green/90 text-white text-[10px] font-bold flex items-center justify-center hover:bg-wc-green shadow-sm"
             title="Sumar repetida"
           >
             +
@@ -183,14 +167,14 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
 
       {/* Quantity badge */}
       {quantity > 1 && (
-        <div className="absolute -top-1.5 -right-1.5 bg-sticker-gold text-black text-[9px] font-black rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-sm">
+        <div className="absolute -top-1.5 -right-1.5 bg-gradient-to-br from-wc-gold-light to-wc-gold text-black text-[9px] font-black rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-md shadow-yellow-500/30">
           {quantity}
         </div>
       )}
 
       {/* Owned checkmark */}
       {owned && !duplicate && (
-        <div className="absolute -top-1 -right-1 bg-sticker-green text-white text-[7px] font-bold rounded-full w-[14px] h-[14px] flex items-center justify-center">
+        <div className="absolute -top-1 -right-1 bg-gradient-to-br from-wc-green to-wc-teal text-white text-[7px] font-bold rounded-full w-[14px] h-[14px] flex items-center justify-center shadow-sm">
           ✓
         </div>
       )}
