@@ -107,17 +107,24 @@ export function StickerCard({ sticker, quantity, onAdd, onRemove, onCameraClick,
               </span>
             </div>
             <span
-              className="text-[8px] font-bold leading-tight truncate w-full px-0.5 py-0.5"
+              className="text-[7px] font-bold leading-tight truncate w-full px-0.5 py-0.5 text-center"
               style={{ color: teamColor || "#333" }}
             >
-              {sticker.code}
+              {sticker.name}
             </span>
           </>
         ) : (
-          /* Empty slot */
-          <span className="text-[10px] font-bold text-white/50">
-            {sticker.code}
-          </span>
+          /* Empty slot - show code + player name */
+          <div className="flex flex-col items-center justify-center h-full px-0.5">
+            <span className="text-[10px] font-bold text-white/50">
+              {sticker.code}
+            </span>
+            {sticker.name !== "Emblem" && sticker.name !== "Team Photo" && (
+              <span className="text-[7px] text-white/35 leading-tight text-center mt-0.5 line-clamp-2">
+                {sticker.name}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
