@@ -357,6 +357,7 @@ export default function Home() {
       {playerDetailCode && (
         <PlayerDetail
           stickerCode={playerDetailCode}
+          image={getImage(playerDetailCode)}
           onClose={() => setPlayerDetailCode(null)}
         />
       )}

@@ -4,6 +4,7 @@ import playersData from "@/data/players-enriched.json";
 
 interface PlayerDetailProps {
   stickerCode: string;
+  image?: string | null;
   onClose: () => void;
 }
 
@@ -42,7 +43,7 @@ function getPositionColor(pos: string): string {
   }
 }
 
-export function PlayerDetail({ stickerCode, onClose }: PlayerDetailProps) {
+export function PlayerDetail({ stickerCode, image, onClose }: PlayerDetailProps) {
   // Find player in enriched data by matching name from sticker catalog
   const player = (playersData.players as PlayerInfo[]).find((p) => {
     // Match by team code + trying to find by name/position order
@@ -82,22 +83,30 @@ export function PlayerDetail({ stickerCode, onClose }: PlayerDetailProps) {
         {/* Header with position color */}
         <div className="px-5 pt-5 pb-3">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getPositionColor(playerInfo.position)}`}>
-                  {getPositionLabel(playerInfo.position)}
-                </span>
-                {playerInfo.is_captain && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
-                    © Capitán
+            <div className="flex items-center gap-3">
+              {/* Player image */}
+              {image && (
+                <div className="w-16 h-20 rounded-lg overflow-hidden border-2 border-white/20 shrink-0">
+                  <img src={image} alt={playerInfo.name} className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getPositionColor(playerInfo.position)}`}>
+                    {getPositionLabel(playerInfo.position)}
                   </span>
-                )}
-                <span className="text-white/40 text-xs">#{playerInfo.shirt_number}</span>
+                  {playerInfo.is_captain && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                      © Capitán
+                    </span>
+                  )}
+                  <span className="text-white/40 text-xs">#{playerInfo.shirt_number}</span>
+                </div>
+                <h2 className="text-xl font-black text-white">{playerInfo.name}</h2>
+                <p className="text-xs text-white/50 mt-0.5">{playerInfo.team_name} · {stickerCode}</p>
               </div>
-              <h2 className="text-xl font-black text-white">{playerInfo.name}</h2>
-              <p className="text-xs text-white/50 mt-0.5">{playerInfo.team_name} · {stickerCode}</p>
             </div>
-            <button onClick={onClose} className="text-white/40 hover:text-white text-xl">✕</button>
+            <button onClick={onClose} className="text-white/40 hover:text-white text-xl self-start">✕</button>
           </div>
         </div>
 
